@@ -1,24 +1,43 @@
 # HauntedPlatform
 
-HauntedPlatform is the public Maven build and dependency-management standard for HauntedMC Java software. It contains no Minecraft runtime or gameplay code.
+HauntedPlatform is the Java build and dependency-management standard for HauntedMC software. It contains no Minecraft runtime or gameplay code.
 
-| Artifact | Use |
+| Artifact | Intended use |
 | --- | --- |
-| `haunted-parent` | Java 25, Maven plugin policy, Enforcer, shared Checkstyle, generic JaCoCo, flattening and deployment policy. |
-| `haunted-library-parent` | Parent for independently reusable libraries; imports only `haunted-dependencies-bom`. |
-| `haunted-application-parent` | Parent for HauntedMC applications; imports `haunted-platform-bom`. |
-| `haunted-dependencies-bom` | Platform-neutral third-party versions. |
+| `haunted-parent` | Java 25, plugin policy, Enforcer, Checkstyle, generic JaCoCo, flattening, and deployment policy. |
+| `haunted-library-parent` | Parent for reusable libraries; imports only `haunted-dependencies-bom`. |
+| `haunted-application-parent` | Parent for deployable HauntedMC applications; imports `haunted-platform-bom`. |
+| `haunted-dependencies-bom` | Shared platform-neutral third-party versions. |
 | `haunted-platform-bom` | Validated public HauntedMC foundation-library versions and FeatureFramework's own BOM. |
 | `haunted-build-rules` | Packaged Checkstyle configuration consumed by the shared parent. |
 
-`FeatureFramework`, `DataProvider`, and `DataRegistry` use `haunted-library-parent`. `ServerFeatures` and `ProxyFeatures` use `haunted-application-parent`. Platform-specific APIs, shading, acceptance tests, repositories, SCM data, release destinations, and coverage thresholds stay in their owning repositories.
+FeatureFramework, DataProvider, and DataRegistry use `haunted-library-parent`. ServerFeatures and ProxyFeatures use `haunted-application-parent`. Runtime targets, shading, acceptance tests, project metadata, release locations, and coverage thresholds remain in their owning repositories.
 
-## Publishing
+## Maven consumption
 
-Releases publish to Maven Central through the Central Portal, not GitHub Packages. The release workflow expects these GitHub Actions secrets: `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `MAVEN_GPG_PRIVATE_KEY`, and `MAVEN_GPG_PASSPHRASE`.
+HauntedPlatform is published only to GitHub Packages. GitHub requires authentication for Maven package downloads, including public packages. Supply a classic personal access token with `read:packages` (and repository access where required) through environment variables; never commit a token.
 
-Before the first release, a HauntedMC maintainer must verify the `nl.hauntedmc.platform` namespace in Central Portal, create a deployment token, and add those secrets. `haunted-platform-bom` imports public foundation artifacts, so their referenced release versions must also be available from Maven Central before publishing this BOM. This repository deliberately does not fall back to GitHub-Packages-only consumption.
+```xml
+<settings>
+  <servers>
+    <server>
+      <id>github</id>
+      <username>${env.PACKAGES_USER}</username>
+      <password>${env.PACKAGES_TOKEN}</password>
+    </server>
+  </servers>
+  <profiles><profile><id>hauntedmc</id><repositories>
+    <repository><id>central</id><url>https://repo.maven.apache.org/maven2</url></repository>
+    <repository><id>github</id><url>https://maven.pkg.github.com/hauntedmc/*</url></repository>
+  </repositories></profile></profiles>
+  <activeProfiles><activeProfile>hauntedmc</activeProfile></activeProfiles>
+</settings>
+```
 
-## Verification
+Each HauntedMC repository commits an equivalent `.mvn/settings.xml` and `.mvn/maven.config` so parent resolution happens before Maven reads the project POM. CI supplies `PACKAGES_USER` and `PACKAGES_TOKEN` from GitHub Actions secrets.
 
-`verification` builds three external-style fixtures using installed artifacts and `<relativePath/>`: a plain BOM consumer, a library-parent consumer, and an application-parent consumer. Run `mvn clean install`, then `mvn -f verification/bom-consumer/pom.xml verify`, and the equivalent commands for the two parent fixtures with a fresh local repository when validating a release candidate.
+## Publishing and verification
+
+The release workflow publishes the complete reactor to `HauntedMC/HauntedPlatform` using `HAUNTEDMC_PACKAGES_USERNAME` and `HAUNTEDMC_PACKAGES_TOKEN`. No Maven Central, signing, or Central Portal credentials are used.
+
+`verification` contains external consumer fixtures for the third-party BOM, library parent, and application parent. They use `<relativePath/>` and are run after publication as well as during local validation.

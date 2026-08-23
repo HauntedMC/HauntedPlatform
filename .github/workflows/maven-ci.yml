@@ -2,27 +2,49 @@ name: Maven CI
 
 on:
   workflow_call:
+    inputs:
+      maven-command:
+        description: Maven command to execute from the repository root.
+        required: false
+        type: string
+        default: ./mvnw -U -B -ntp clean verify
     secrets:
-      MAVEN_USERNAME:
-        required: false
-      MAVEN_TOKEN:
-        required: false
+      PACKAGES_USER:
+        required: true
+      PACKAGES_TOKEN:
+        required: true
   push:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PACKAGES_USER: ${{ secrets.PACKAGES_USER || secrets.HAUNTEDMC_PACKAGES_USERNAME }}
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.HAUNTEDMC_PACKAGES_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '25'
           cache: maven
-          server-id: github
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_TOKEN
-      - run: mvn -B clean verify
-      - run: mvn -B dependency:tree help:effective-pom
+      - name: Validate GitHub Packages credentials
+        shell: bash
+        run: |
+          test -n "$PACKAGES_USER" || { echo "Missing GitHub Packages username." >&2; exit 1; }
+          test -n "$PACKAGES_TOKEN" || { echo "Missing GitHub Packages token." >&2; exit 1; }
+      - name: Run Maven verification
+        shell: bash
+        run: ${{ inputs.maven-command || 'mvn -U -B -ntp clean verify' }}
+      - name: Capture resolved build model
+        shell: bash
+        run: mvn -U -B -ntp dependency:tree help:effective-pom

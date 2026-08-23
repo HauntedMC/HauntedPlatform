@@ -1,32 +1,46 @@
-name: Maven Central release
+name: GitHub Packages release
 
 on:
+  push:
+    tags: ['v*']
   workflow_dispatch:
-    inputs:
-      release_version:
-        description: Released platform version
-        required: true
-        default: 1.0.0
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME }}
+      PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '25'
           cache: maven
-          server-id: central
-          server-username: CENTRAL_USERNAME
-          server-password: CENTRAL_PASSWORD
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
-      - run: mvn -B -Prelease clean deploy
-        env:
-          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      - name: Validate GitHub Packages credentials
+        shell: bash
+        run: |
+          test -n "$PACKAGES_USER" || { echo "Missing HAUNTEDMC_PACKAGES_USERNAME." >&2; exit 1; }
+          test -n "$PACKAGES_TOKEN" || { echo "Missing HAUNTEDMC_PACKAGES_TOKEN." >&2; exit 1; }
+      - name: Validate release version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          project_version="$(mvn -q -ntp -DforceStdout help:evaluate -Dexpression=project.version | tail -n 1)"
+          test "$project_version" = "${GITHUB_REF_NAME#v}" || { echo "Tag and project versions differ." >&2; exit 1; }
+      - name: Verify and publish the release reactor
+        run: mvn -U -B -ntp clean deploy
+      - name: Verify deployed consumer contracts
+        run: |
+          mvn -U -B -ntp -f verification/bom-consumer/pom.xml clean verify
+          mvn -U -B -ntp -f verification/library-parent-consumer/pom.xml clean verify
+          mvn -U -B -ntp -f verification/application-parent-consumer/pom.xml clean verify
