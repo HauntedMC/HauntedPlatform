@@ -29,12 +29,14 @@ HauntedPlatform is published only to GitHub Packages. GitHub requires authentica
   <profiles><profile><id>hauntedmc</id><repositories>
     <repository><id>central</id><url>https://repo.maven.apache.org/maven2</url></repository>
     <repository><id>github</id><url>https://maven.pkg.github.com/hauntedmc/*</url></repository>
-  </repositories></profile></profiles>
+  </repositories>
+  <pluginRepositories><pluginRepository><id>github</id><url>https://maven.pkg.github.com/hauntedmc/*</url></pluginRepository></pluginRepositories>
+  </profile></profiles>
   <activeProfiles><activeProfile>hauntedmc</activeProfile></activeProfiles>
 </settings>
 ```
 
-Each HauntedMC repository commits an equivalent `.mvn/settings.xml` and `.mvn/maven.config` so parent resolution happens before Maven reads the project POM. CI supplies `PACKAGES_USER` and `PACKAGES_TOKEN` from GitHub Actions secrets.
+Each HauntedMC repository commits an equivalent `.mvn/settings.xml` and `.mvn/maven.config` so parent resolution happens before Maven reads the project POM, and so packaged Maven-plugin dependencies such as the shared Checkstyle rules resolve from GitHub Packages. CI supplies `PACKAGES_USER` and `PACKAGES_TOKEN` from GitHub Actions secrets.
 
 ## Publishing and verification
 
