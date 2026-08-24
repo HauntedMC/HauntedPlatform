@@ -17,11 +17,11 @@ jobs:
       PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME }}
       PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '25'
@@ -40,7 +40,10 @@ jobs:
       - name: Verify and publish the release reactor
         run: mvn -U -B -ntp clean deploy
       - name: Verify deployed consumer contracts
+        env:
+          VERIFICATION_REPOSITORY: ${{ runner.temp }}/haunted-platform-verification-m2
         run: |
-          mvn -U -B -ntp -f verification/bom-consumer/pom.xml clean verify
-          mvn -U -B -ntp -f verification/library-parent-consumer/pom.xml clean verify
-          mvn -U -B -ntp -f verification/application-parent-consumer/pom.xml clean verify
+          rm -rf "$VERIFICATION_REPOSITORY"
+          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/bom-consumer/pom.xml clean verify
+          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/library-parent-consumer/pom.xml clean verify
+          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml clean verify

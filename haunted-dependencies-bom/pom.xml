@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
-  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>1.0.0</version></parent>
+  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>1.0.1</version></parent>
   <artifactId>haunted-dependencies-bom</artifactId><packaging>pom</packaging><name>HauntedPlatform third-party dependencies BOM</name><description>Common, platform-neutral third-party dependency versions.</description>
   <dependencyManagement><dependencies>
     <dependency><groupId>net.kyori</groupId><artifactId>adventure-bom</artifactId><version>5.2.0</version><type>pom</type><scope>import</scope></dependency>
@@ -17,5 +17,6 @@
     <dependency><groupId>jakarta.xml.bind</groupId><artifactId>jakarta.xml.bind-api</artifactId><version>4.0.5</version></dependency>
     <dependency><groupId>org.glassfish.jaxb</groupId><artifactId>jaxb-runtime</artifactId><version>4.0.9</version></dependency>
     <dependency><groupId>org.jboss.logging</groupId><artifactId>jboss-logging</artifactId><version>3.6.3.Final</version></dependency>
+    <dependency><groupId>org.hibernate.orm</groupId><artifactId>hibernate-core</artifactId><version>7.4.5.Final</version></dependency>
   </dependencies></dependencyManagement>
 </project>

@@ -7,8 +7,8 @@ HauntedPlatform is the Java build and dependency-management standard for Haunted
 | `haunted-parent` | Java 25, plugin policy, Enforcer, Checkstyle, generic JaCoCo, flattening, and deployment policy. |
 | `haunted-library-parent` | Parent for reusable libraries; imports only `haunted-dependencies-bom`. |
 | `haunted-application-parent` | Parent for deployable HauntedMC applications; imports `haunted-platform-bom`. |
-| `haunted-dependencies-bom` | Shared platform-neutral third-party versions. |
-| `haunted-platform-bom` | Validated public HauntedMC foundation-library versions and FeatureFramework's own BOM. |
+| `haunted-dependencies-bom` | Shared platform-neutral third-party versions, including Hibernate where it is shared across projects. |
+| `haunted-platform-bom` | Validated public HauntedMC foundation-library versions, including Theme, and FeatureFramework's own BOM. |
 | `haunted-build-rules` | Packaged Checkstyle configuration consumed by the shared parent. |
 
 FeatureFramework, DataProvider, and DataRegistry use `haunted-library-parent`. ServerFeatures and ProxyFeatures use `haunted-application-parent`. Runtime targets, shading, acceptance tests, project metadata, release locations, and coverage thresholds remain in their owning repositories.
@@ -42,4 +42,4 @@ Each HauntedMC repository commits an equivalent `.mvn/settings.xml` and `.mvn/ma
 
 The release workflow publishes the complete reactor to `HauntedMC/HauntedPlatform` using `HAUNTEDMC_PACKAGES_USERNAME` and `HAUNTEDMC_PACKAGES_TOKEN`. No Maven Central, signing, or Central Portal credentials are used.
 
-`verification` contains external consumer fixtures for the third-party BOM, library parent, and application parent. They use `<relativePath/>` and are run after publication as well as during local validation.
+`verification` contains external consumer fixtures for the third-party BOM, library parent, and application parent. They use `<relativePath/>`; the release workflow runs them after publication with a fresh Maven repository, preventing reactor or local-cache resolution from masking publication defects.
