@@ -64,7 +64,7 @@ Deployable HauntedMC applications inherit the application parent. It imports the
 
 Use `haunted-dependencies-bom` directly only for a build that intentionally does not inherit a HauntedPlatform parent. Libraries keep their own public compatibility versions where necessary; applications may retain local aliases such as `${featureframework.version}` only when they forward a `${haunted.*}` Platform property. Do not re-import FeatureFramework, Adventure, OpenTelemetry, or common third-party BOMs in an application that already inherits `haunted-application-parent`.
 
-OpenTelemetry core artifacts are aligned through `io.opentelemetry:opentelemetry-bom` at `${haunted.opentelemetry.version}`. The unified JVM runtime telemetry library is managed separately through `${haunted.opentelemetry.instrumentation.version}` because that artifact is currently published from the instrumentation alpha line.
+OpenTelemetry core artifacts are aligned through `io.opentelemetry:opentelemetry-bom` at `${haunted.opentelemetry.version}`. The unified JVM runtime telemetry library is managed separately through `${haunted.opentelemetry.runtime-telemetry.version}` because that artifact is currently published from the instrumentation alpha line. Keep that alpha implementation behind runtime/integration boundaries; do not expose its types from stable HauntedMC public APIs.
 
 ## Publishing and verification
 
