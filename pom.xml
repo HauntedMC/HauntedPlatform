@@ -25,7 +25,7 @@
         <!-- The catalog is consumed by Platform's BOMs and application parent only. -->
         <haunted.featureframework.version>1.6.0</haunted.featureframework.version>
         <haunted.dataprovider.version>3.2.0</haunted.dataprovider.version>
-        <haunted.dataregistry.version>1.14.4</haunted.dataregistry.version>
+        <haunted.dataregistry.version>1.14.3</haunted.dataregistry.version>
         <haunted.theme.version>1.0.0</haunted.theme.version>
         <haunted.opentelemetry.version>1.64.0</haunted.opentelemetry.version>
         <haunted.opentelemetry.instrumentation.version>2.30.0-alpha</haunted.opentelemetry.instrumentation.version>
