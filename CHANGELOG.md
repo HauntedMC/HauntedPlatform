@@ -5,7 +5,6 @@
 - Added OpenTelemetry 1.64.0 dependency management through the official stable OpenTelemetry BOM.
 - Added managed unified JVM runtime telemetry `2.30.0-alpha`, aligned with OpenTelemetry 1.64.0.
 - Updated external consumer verification so both library and application parents prove the OpenTelemetry API, SDK/exporter, and runtime-telemetry versions resolve without local pins.
-- Aligned the ecosystem DataRegistry catalog with the already published DataRegistry 1.14.4 release.
 
 ## 1.2.0
 
