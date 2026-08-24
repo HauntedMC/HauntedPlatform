@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>nl.hauntedmc.platform</groupId>
     <artifactId>haunted-platform</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
     <name>HauntedPlatform</name>
     <description>Shared Java build and dependency-management standards for HauntedMC.</description>
     <url>https://github.com/HauntedMC/HauntedPlatform</url>
     <licenses><license><name>GNU Affero General Public License v3.0</name><url>https://www.gnu.org/licenses/agpl-3.0.txt</url><distribution>repo</distribution></license></licenses>
     <developers><developer><id>HauntedMC</id><name>HauntedMC</name><url>https://www.hauntedmc.nl</url></developer></developers>
-    <scm><connection>scm:git:https://github.com/HauntedMC/HauntedPlatform.git</connection><developerConnection>scm:git:ssh://git@github.com/HauntedMC/HauntedPlatform.git</developerConnection><url>https://github.com/HauntedMC/HauntedPlatform</url><tag>v1.1.0</tag></scm>
+    <scm><connection>scm:git:https://github.com/HauntedMC/HauntedPlatform.git</connection><developerConnection>scm:git:ssh://git@github.com/HauntedMC/HauntedPlatform.git</developerConnection><url>https://github.com/HauntedMC/HauntedPlatform</url><tag>v1.2.0</tag></scm>
     <modules><module>haunted-build-rules</module><module>haunted-dependencies-bom</module><module>haunted-parent</module><module>haunted-library-parent</module><module>haunted-platform-bom</module><module>haunted-application-parent</module></modules>
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
@@ -41,6 +41,8 @@
         <haunted.jaxb.runtime.version>4.0.9</haunted.jaxb.runtime.version>
         <haunted.jboss.logging.version>3.6.3.Final</haunted.jboss.logging.version>
         <haunted.hibernate.version>7.4.5.Final</haunted.hibernate.version>
+        <haunted.testcontainers.version>1.21.4</haunted.testcontainers.version>
+        <haunted.snakeyaml.version>2.6</haunted.snakeyaml.version>
     </properties>
     <distributionManagement><repository><id>github</id><name>GitHub Packages - HauntedPlatform</name><url>https://maven.pkg.github.com/HauntedMC/HauntedPlatform</url></repository></distributionManagement>
     <build><pluginManagement><plugins>

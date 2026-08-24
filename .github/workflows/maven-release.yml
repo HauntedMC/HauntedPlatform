@@ -37,8 +37,18 @@ jobs:
         run: |
           project_version="$(mvn -q -ntp -DforceStdout help:evaluate -Dexpression=project.version | tail -n 1)"
           test "$project_version" = "${GITHUB_REF_NAME#v}" || { echo "Tag and project versions differ." >&2; exit 1; }
-      - name: Verify and publish the release reactor
-        run: mvn -U -B -ntp clean deploy
+      - name: Install and verify release consumer contracts
+        env:
+          VERIFICATION_REPOSITORY: ${{ runner.temp }}/haunted-platform-release-m2
+        run: |
+          rm -rf "$VERIFICATION_REPOSITORY"
+          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" clean install
+          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/bom-consumer/pom.xml clean verify
+          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/library-parent-consumer/pom.xml clean verify
+          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml clean verify
+          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-graph-regression/pom.xml clean verify
+      - name: Publish the verified release reactor
+        run: mvn -U -B -ntp -DdeployAtEnd=true clean deploy
       - name: Verify deployed consumer contracts
         env:
           VERIFICATION_REPOSITORY: ${{ runner.temp }}/haunted-platform-verification-m2
