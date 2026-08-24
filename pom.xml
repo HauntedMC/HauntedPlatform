@@ -28,7 +28,7 @@
         <haunted.dataregistry.version>1.14.3</haunted.dataregistry.version>
         <haunted.theme.version>1.0.0</haunted.theme.version>
         <haunted.opentelemetry.version>1.65.0</haunted.opentelemetry.version>
-        <haunted.opentelemetry.instrumentation.version>2.31.0-alpha</haunted.opentelemetry.instrumentation.version>
+        <haunted.opentelemetry.runtime-telemetry.version>2.31.0-alpha</haunted.opentelemetry.runtime-telemetry.version>
         <haunted.adventure.version>5.2.0</haunted.adventure.version>
         <haunted.gson.version>2.14.0</haunted.gson.version>
         <haunted.configurate.version>4.2.0</haunted.configurate.version>
