@@ -3,7 +3,6 @@ name: GitHub Packages release
 on:
   push:
     tags: ['v*']
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -32,7 +31,6 @@ jobs:
           test -n "$PACKAGES_USER" || { echo "Missing HAUNTEDMC_PACKAGES_USERNAME." >&2; exit 1; }
           test -n "$PACKAGES_TOKEN" || { echo "Missing HAUNTEDMC_PACKAGES_TOKEN." >&2; exit 1; }
       - name: Validate release version
-        if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         run: |
           project_version="$(mvn -q -ntp -DforceStdout help:evaluate -Dexpression=project.version | tail -n 1)"
