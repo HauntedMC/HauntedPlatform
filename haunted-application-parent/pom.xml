@@ -1,2 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-parent</artifactId><version>1.0.1</version><relativePath>../haunted-parent/pom.xml</relativePath></parent><artifactId>haunted-application-parent</artifactId><packaging>pom</packaging><name>HauntedPlatform application parent</name><description>Parent for HauntedMC deployable applications and services.</description><dependencyManagement><dependencies><dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform-bom</artifactId><version>1.0.1</version><type>pom</type><scope>import</scope></dependency></dependencies></dependencyManagement></project>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.hauntedmc.platform</groupId>
+        <artifactId>haunted-parent</artifactId>
+        <version>1.1.0</version>
+        <relativePath>../haunted-parent/pom.xml</relativePath>
+    </parent>
+    <artifactId>haunted-application-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>HauntedPlatform application parent</name>
+    <description>Parent for HauntedMC deployable applications and services.</description>
+    <dependencyManagement>
+        <dependencies>
+            <dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform-bom</artifactId><version>1.1.0</version><type>pom</type><scope>import</scope></dependency>
+
+            <!-- Maven cannot use a nested imported BOM to override FeatureFramework's inherited management. -->
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-api</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-key</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-nbt</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-serializer-configurate4</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-logger-slf4j</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-minimessage</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-serializer-ansi</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-serializer-commons</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-serializer-gson</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-serializer-json</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-serializer-json-legacy-impl</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-serializer-legacy</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>net.kyori</groupId><artifactId>adventure-text-serializer-plain</artifactId><version>${haunted.adventure.version}</version></dependency>
+            <dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>${haunted.gson.version}</version></dependency>
+            <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId><version>${haunted.slf4j.version}</version></dependency>
+            <dependency><groupId>com.google.errorprone</groupId><artifactId>error_prone_annotations</artifactId><version>${haunted.errorprone.version}</version></dependency>
+            <dependency><groupId>org.jetbrains</groupId><artifactId>annotations</artifactId><version>${haunted.jetbrains.annotations.version}</version></dependency>
+            <dependency><groupId>org.jspecify</groupId><artifactId>jspecify</artifactId><version>${haunted.jspecify.version}</version></dependency>
+            <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>${haunted.junit.version}</version></dependency>
+            <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><version>${haunted.mockito.version}</version></dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

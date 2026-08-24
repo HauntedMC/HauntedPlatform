@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>nl.hauntedmc.platform</groupId>
     <artifactId>haunted-platform</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>HauntedPlatform</name>
     <description>Shared Java build and dependency-management standards for HauntedMC.</description>
     <url>https://github.com/HauntedMC/HauntedPlatform</url>
     <licenses><license><name>GNU Affero General Public License v3.0</name><url>https://www.gnu.org/licenses/agpl-3.0.txt</url><distribution>repo</distribution></license></licenses>
     <developers><developer><id>HauntedMC</id><name>HauntedMC</name><url>https://www.hauntedmc.nl</url></developer></developers>
-    <scm><connection>scm:git:https://github.com/HauntedMC/HauntedPlatform.git</connection><developerConnection>scm:git:ssh://git@github.com/HauntedMC/HauntedPlatform.git</developerConnection><url>https://github.com/HauntedMC/HauntedPlatform</url><tag>v1.0.1</tag></scm>
+    <scm><connection>scm:git:https://github.com/HauntedMC/HauntedPlatform.git</connection><developerConnection>scm:git:ssh://git@github.com/HauntedMC/HauntedPlatform.git</developerConnection><url>https://github.com/HauntedMC/HauntedPlatform</url><tag>v1.1.0</tag></scm>
     <modules><module>haunted-build-rules</module><module>haunted-dependencies-bom</module><module>haunted-parent</module><module>haunted-library-parent</module><module>haunted-platform-bom</module><module>haunted-application-parent</module></modules>
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
@@ -22,6 +22,25 @@
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven.install.plugin.version>3.1.4</maven.install.plugin.version>
         <maven.deploy.plugin.version>3.1.4</maven.deploy.plugin.version>
+        <!-- The catalog is consumed by Platform's BOMs and application parent only. -->
+        <haunted.featureframework.version>1.6.0</haunted.featureframework.version>
+        <haunted.dataprovider.version>3.2.0</haunted.dataprovider.version>
+        <haunted.dataregistry.version>1.14.3</haunted.dataregistry.version>
+        <haunted.theme.version>1.0.0</haunted.theme.version>
+        <haunted.adventure.version>5.2.0</haunted.adventure.version>
+        <haunted.gson.version>2.14.0</haunted.gson.version>
+        <haunted.configurate.version>4.2.0</haunted.configurate.version>
+        <haunted.slf4j.version>2.0.18</haunted.slf4j.version>
+        <haunted.junit.version>6.1.3</haunted.junit.version>
+        <haunted.mockito.version>5.23.0</haunted.mockito.version>
+        <haunted.errorprone.version>2.50.0</haunted.errorprone.version>
+        <haunted.jetbrains.annotations.version>26.1.0</haunted.jetbrains.annotations.version>
+        <haunted.jspecify.version>1.0.1</haunted.jspecify.version>
+        <haunted.jpa.version>3.2.0</haunted.jpa.version>
+        <haunted.jaxb.api.version>4.0.5</haunted.jaxb.api.version>
+        <haunted.jaxb.runtime.version>4.0.9</haunted.jaxb.runtime.version>
+        <haunted.jboss.logging.version>3.6.3.Final</haunted.jboss.logging.version>
+        <haunted.hibernate.version>7.4.5.Final</haunted.hibernate.version>
     </properties>
     <distributionManagement><repository><id>github</id><name>GitHub Packages - HauntedPlatform</name><url>https://maven.pkg.github.com/HauntedMC/HauntedPlatform</url></repository></distributionManagement>
     <build><pluginManagement><plugins>

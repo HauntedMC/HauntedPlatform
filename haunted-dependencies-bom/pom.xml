@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
-  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>1.0.1</version></parent>
+  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>1.1.0</version></parent>
   <artifactId>haunted-dependencies-bom</artifactId><packaging>pom</packaging><name>HauntedPlatform third-party dependencies BOM</name><description>Common, platform-neutral third-party dependency versions.</description>
   <dependencyManagement><dependencies>
-    <dependency><groupId>net.kyori</groupId><artifactId>adventure-bom</artifactId><version>5.2.0</version><type>pom</type><scope>import</scope></dependency>
-    <dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>2.14.0</version></dependency>
-    <dependency><groupId>org.spongepowered</groupId><artifactId>configurate-core</artifactId><version>4.2.0</version></dependency>
-    <dependency><groupId>org.spongepowered</groupId><artifactId>configurate-yaml</artifactId><version>4.2.0</version></dependency>
-    <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId><version>2.0.18</version></dependency>
-    <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>6.1.2</version></dependency>
-    <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><version>5.23.0</version></dependency>
-    <dependency><groupId>com.google.errorprone</groupId><artifactId>error_prone_annotations</artifactId><version>2.49.0</version></dependency>
-    <dependency><groupId>org.jetbrains</groupId><artifactId>annotations</artifactId><version>26.1.0</version></dependency>
-    <dependency><groupId>org.jspecify</groupId><artifactId>jspecify</artifactId><version>1.0.1</version></dependency>
-    <dependency><groupId>jakarta.persistence</groupId><artifactId>jakarta.persistence-api</artifactId><version>3.2.0</version></dependency>
-    <dependency><groupId>jakarta.xml.bind</groupId><artifactId>jakarta.xml.bind-api</artifactId><version>4.0.5</version></dependency>
-    <dependency><groupId>org.glassfish.jaxb</groupId><artifactId>jaxb-runtime</artifactId><version>4.0.9</version></dependency>
-    <dependency><groupId>org.jboss.logging</groupId><artifactId>jboss-logging</artifactId><version>3.6.3.Final</version></dependency>
-    <dependency><groupId>org.hibernate.orm</groupId><artifactId>hibernate-core</artifactId><version>7.4.5.Final</version></dependency>
+    <dependency><groupId>net.kyori</groupId><artifactId>adventure-bom</artifactId><version>${haunted.adventure.version}</version><type>pom</type><scope>import</scope></dependency>
+    <dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>${haunted.gson.version}</version></dependency>
+    <dependency><groupId>org.spongepowered</groupId><artifactId>configurate-core</artifactId><version>${haunted.configurate.version}</version></dependency>
+    <dependency><groupId>org.spongepowered</groupId><artifactId>configurate-yaml</artifactId><version>${haunted.configurate.version}</version></dependency>
+    <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId><version>${haunted.slf4j.version}</version></dependency>
+    <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>${haunted.junit.version}</version></dependency>
+    <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><version>${haunted.mockito.version}</version></dependency>
+    <dependency><groupId>com.google.errorprone</groupId><artifactId>error_prone_annotations</artifactId><version>${haunted.errorprone.version}</version></dependency>
+    <dependency><groupId>org.jetbrains</groupId><artifactId>annotations</artifactId><version>${haunted.jetbrains.annotations.version}</version></dependency>
+    <dependency><groupId>org.jspecify</groupId><artifactId>jspecify</artifactId><version>${haunted.jspecify.version}</version></dependency>
+    <dependency><groupId>jakarta.persistence</groupId><artifactId>jakarta.persistence-api</artifactId><version>${haunted.jpa.version}</version></dependency>
+    <dependency><groupId>jakarta.xml.bind</groupId><artifactId>jakarta.xml.bind-api</artifactId><version>${haunted.jaxb.api.version}</version></dependency>
+    <dependency><groupId>org.glassfish.jaxb</groupId><artifactId>jaxb-runtime</artifactId><version>${haunted.jaxb.runtime.version}</version></dependency>
+    <dependency><groupId>org.jboss.logging</groupId><artifactId>jboss-logging</artifactId><version>${haunted.jboss.logging.version}</version></dependency>
+    <dependency><groupId>org.hibernate.orm</groupId><artifactId>hibernate-core</artifactId><version>${haunted.hibernate.version}</version></dependency>
   </dependencies></dependencyManagement>
 </project>
