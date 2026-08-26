@@ -23,6 +23,8 @@
         <dependency><groupId>nl.hauntedmc.dataregistry</groupId><artifactId>dataregistry-platform-paper</artifactId></dependency>
         <dependency><groupId>nl.hauntedmc.dataregistry</groupId><artifactId>dataregistry-platform-velocity</artifactId></dependency>
         <dependency><groupId>nl.hauntedmc.dataregistry</groupId><artifactId>dataregistry-testkit</artifactId></dependency>
+        <dependency><groupId>nl.hauntedmc.theme</groupId><artifactId>hauntedmc-theme-palette</artifactId></dependency>
+        <dependency><groupId>nl.hauntedmc.theme</groupId><artifactId>hauntedmc-theme-featureframework</artifactId></dependency>
         <dependency><groupId>nl.hauntedmc.observability</groupId><artifactId>haunted-observability-featureframework</artifactId></dependency>
         <dependency><groupId>nl.hauntedmc.observability</groupId><artifactId>haunted-observability-dataprovider</artifactId></dependency>
         <dependency><groupId>nl.hauntedmc.observability</groupId><artifactId>haunted-observability-dataregistry</artifactId></dependency>
