@@ -4,7 +4,7 @@
     <parent>
         <groupId>nl.hauntedmc.platform</groupId>
         <artifactId>haunted-parent</artifactId>
-        <version>1.3.0</version>
+        <version>1.4.0</version>
         <relativePath>../haunted-parent/pom.xml</relativePath>
     </parent>
     <artifactId>haunted-library-parent</artifactId>
@@ -16,7 +16,7 @@
             <dependency>
                 <groupId>nl.hauntedmc.platform</groupId>
                 <artifactId>haunted-dependencies-bom</artifactId>
-                <version>1.3.0</version>
+                <version>1.4.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
