@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- Finalized the observability-capable HauntedMC ecosystem baseline.
+- Updated FeatureFramework to 1.7.0, DataProvider to 3.3.0, and DataRegistry to 1.15.0.
+- Added HauntedObservability 1.0.0 through its published BOM so application consumers can use its modules without local version pins.
+- Extended application consumer and Paper/Velocity regression fixtures to verify the aligned HauntedObservability dependency graph together with FeatureFramework, DataProvider, and DataRegistry.
+- Kept Java 25, OpenTelemetry 1.65.0, runtime telemetry 2.31.0-alpha, and unrelated build/runtime policy unchanged.
+
 ## 1.3.0
 
 - Added OpenTelemetry 1.65.0 dependency management through the official stable OpenTelemetry BOM.
