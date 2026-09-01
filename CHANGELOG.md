@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0
+
+- Updated the ecosystem BOM to FeatureFramework 1.8.0, DataProvider 3.4.1, and DataRegistry 1.16.0 for the clean-break multi-proxy release.
+- Kept the library and application parents as the supported entry points, so application projects inherit the aligned foundation catalog without local overrides.
+
 ## 1.4.0
 
 - Finalized the observability-capable HauntedMC ecosystem baseline.
