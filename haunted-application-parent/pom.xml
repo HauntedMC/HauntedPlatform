@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
     <name>HauntedPlatform application parent</name>
     <description>Parent for HauntedMC deployable applications and services.</description>
-    <properties><cyclonedx.version>2.9.2</cyclonedx.version></properties>
+    <properties><cyclonedx.version>2.9.3</cyclonedx.version></properties>
     <build><pluginManagement><plugins><plugin><groupId>org.cyclonedx</groupId><artifactId>cyclonedx-maven-plugin</artifactId><version>${cyclonedx.version}</version></plugin></plugins></pluginManagement></build>
     <dependencyManagement>
         <dependencies>
