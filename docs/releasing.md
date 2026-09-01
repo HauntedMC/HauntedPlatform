@@ -43,6 +43,10 @@ HauntedPlatform releases are compatibility decisions, not routine bulk dependenc
 
 Release FeatureFramework, DataProvider, DataRegistry, HauntedObservability, or Theme first. Only after a public version is published may a later HauntedPlatform release update the corresponding `haunted-platform-bom` property or imported foundation BOM. Never put an unreleased foundation-library version in the Platform BOM.
 
+Release the foundation projects in dependency order, not alphabetically. A project must only be tagged after every externally resolved HauntedMC dependency in its release POM is publicly available. For the multi-proxy release, the order is DataProvider, DataRegistry, FeatureFramework, HauntedPlatform, ProxyFeatures, and ServerFeatures. DataRegistry depends on the new DataProvider release; FeatureFramework depends on both; the Platform BOM names all three; ProxyFeatures consumes that published BOM; and ServerFeatures consumes ProxyFeatures.
+
+Foundation libraries keep using an already-published `haunted-library-parent` while they are released. They do not advance to the Platform version that catalogs their own release. Only deployable applications advance to the new `haunted-application-parent` after the corresponding Platform BOM has passed publication and fresh-repository verification.
+
 FeatureFramework and HauntedObservability own alignment of their own modules through their published BOMs. HauntedPlatform selects the exact released BOM versions and remains the compatibility authority for the complete application set. DataProvider and DataRegistry modules remain directly aligned in `haunted-platform-bom` until those projects deliberately publish their own BOMs.
 
 Applications inheriting `haunted-application-parent` must consume the Platform-selected ecosystem rather than re-importing FeatureFramework or HauntedObservability BOMs or independently pinning their module versions. Reusable libraries continue to inherit `haunted-library-parent`, which imports only the platform-neutral third-party BOM.

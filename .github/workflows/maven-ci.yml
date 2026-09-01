@@ -100,7 +100,7 @@ jobs:
             fi
           }
 
-          assert_property haunted.featureframework.version 1.7.0
-          assert_property haunted.dataprovider.version 3.3.0
-          assert_property haunted.dataregistry.version 1.15.0
+          assert_property haunted.featureframework.version 1.8.0
+          assert_property haunted.dataprovider.version 3.4.1
+          assert_property haunted.dataregistry.version 1.16.0
           assert_property haunted.observability.version 1.0.1
