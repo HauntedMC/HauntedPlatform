@@ -43,7 +43,7 @@
         <haunted.jaxb.api.version>4.0.5</haunted.jaxb.api.version>
         <haunted.jaxb.runtime.version>4.0.9</haunted.jaxb.runtime.version>
         <haunted.jboss.logging.version>3.6.3.Final</haunted.jboss.logging.version>
-        <haunted.hibernate.version>7.4.5.Final</haunted.hibernate.version>
+        <haunted.hibernate.version>7.4.6.Final</haunted.hibernate.version>
         <haunted.testcontainers.version>1.21.4</haunted.testcontainers.version>
         <haunted.snakeyaml.version>2.6</haunted.snakeyaml.version>
     </properties>
