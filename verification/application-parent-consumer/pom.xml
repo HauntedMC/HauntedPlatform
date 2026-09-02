@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
-  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-application-parent</artifactId><version>1.5.0</version><relativePath/></parent>
-  <groupId>nl.hauntedmc.platform.verification</groupId><artifactId>application-parent-consumer</artifactId><version>1.5.0</version><packaging>jar</packaging>
+  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-application-parent</artifactId><version>1.6.0</version><relativePath/></parent>
+  <groupId>nl.hauntedmc.platform.verification</groupId><artifactId>application-parent-consumer</artifactId><version>1.6.0</version><packaging>jar</packaging>
   <dependencies>
     <dependency><groupId>nl.hauntedmc.featureframework</groupId><artifactId>featureframework-toolkit</artifactId></dependency>
+    <dependency><groupId>nl.hauntedmc.featureframework</groupId><artifactId>featureframework-cluster</artifactId></dependency>
+    <dependency><groupId>nl.hauntedmc.featureframework</groupId><artifactId>featureframework-cluster-dataprovider</artifactId></dependency>
     <dependency><groupId>nl.hauntedmc.dataprovider</groupId><artifactId>dataprovider-core</artifactId></dependency>
     <dependency><groupId>nl.hauntedmc.dataregistry</groupId><artifactId>dataregistry-core</artifactId></dependency>
     <dependency><groupId>nl.hauntedmc.observability</groupId><artifactId>haunted-observability-api</artifactId></dependency>

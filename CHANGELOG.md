@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.0
+
+- Aligned the application ecosystem to FeatureFramework 2.0.0, DataProvider 3.4.2, and DataRegistry 1.17.0.
+- Kept FeatureFramework module management delegated to `featureframework-bom`; external application verification now proves the new cluster modules resolve without local version pins.
+
 ## 1.5.0
 
 - Updated the ecosystem BOM to FeatureFramework 1.8.0, DataProvider 3.4.1, and DataRegistry 1.16.0 for the clean-break multi-proxy release.
