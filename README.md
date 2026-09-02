@@ -46,7 +46,7 @@ Reusable libraries inherit the library parent and must not import the ecosystem 
 <parent>
   <groupId>nl.hauntedmc.platform</groupId>
   <artifactId>haunted-library-parent</artifactId>
-  <version>1.4.0</version>
+  <version>1.6.0</version>
   <relativePath/>
 </parent>
 ```
@@ -57,7 +57,7 @@ Deployable HauntedMC applications inherit the application parent. It imports the
 <parent>
   <groupId>nl.hauntedmc.platform</groupId>
   <artifactId>haunted-application-parent</artifactId>
-  <version>1.4.0</version>
+  <version>1.6.0</version>
   <relativePath/>
 </parent>
 ```
@@ -78,6 +78,6 @@ The application parent contains direct Adventure and common-library constraints 
 
 ## Release policy
 
-HauntedPlatform releases are immutable Git tags and GitHub Packages versions. Consumers use released parent artifact versions and immutable reusable-workflow tags such as `@v1.4.0`, never `@main`. A platform BOM release names only already published public foundation artifacts; public-library releases are aligned by a later Platform release.
+HauntedPlatform releases are immutable Git tags and GitHub Packages versions. Consumers use released parent artifact versions and immutable reusable-workflow tags such as `@v1.6.0`, never `@main`. A platform BOM release names only already published public foundation artifacts; public-library releases are aligned by a later Platform release.
 
 For the maintained release procedure and the guarded version-update command, see [docs/releasing.md](docs/releasing.md). See [CHANGELOG.md](CHANGELOG.md) for upgrade notes.
