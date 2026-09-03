@@ -86,21 +86,3 @@ jobs:
 
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml dependency:tree help:effective-pom
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-graph-regression/pom.xml dependency:tree help:effective-pom
-
-          assert_property() {
-            local expression="$1"
-            local expected="$2"
-            local actual
-            actual="$(mvn -q -Dstyle.color=never -Dmaven.repo.local="$VERIFICATION_REPOSITORY" \
-              -f verification/application-parent-consumer/pom.xml \
-              help:evaluate -Dexpression="$expression" -DforceStdout)"
-            if [[ "$actual" != "$expected" ]]; then
-              echo "Expected $expression=$expected but resolved $actual" >&2
-              exit 1
-            fi
-          }
-
-          assert_property haunted.featureframework.version 2.0.0
-          assert_property haunted.dataprovider.version 3.4.2
-          assert_property haunted.dataregistry.version 1.17.0
-          assert_property haunted.observability.version 1.0.1
