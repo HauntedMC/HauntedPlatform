@@ -4,7 +4,7 @@
     <parent>
         <groupId>nl.hauntedmc.platform</groupId>
         <artifactId>haunted-parent</artifactId>
-        <version>1.6.1</version>
+        <version>1.6.2</version>
         <relativePath>../haunted-parent/pom.xml</relativePath>
     </parent>
     <artifactId>haunted-application-parent</artifactId>
@@ -15,7 +15,7 @@
     <build><pluginManagement><plugins><plugin><groupId>org.cyclonedx</groupId><artifactId>cyclonedx-maven-plugin</artifactId><version>${cyclonedx.version}</version></plugin></plugins></pluginManagement></build>
     <dependencyManagement>
         <dependencies>
-            <dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform-bom</artifactId><version>1.6.1</version><type>pom</type><scope>import</scope></dependency>
+            <dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform-bom</artifactId><version>1.6.2</version><type>pom</type><scope>import</scope></dependency>
 
             <!-- Maven cannot use a nested imported BOM to override FeatureFramework's inherited management. -->
             <dependency><groupId>net.kyori</groupId><artifactId>adventure-api</artifactId><version>${haunted.adventure.version}</version></dependency>
