@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
-  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-application-parent</artifactId><version>1.6.2</version><relativePath/></parent>
-  <groupId>nl.hauntedmc.platform.verification</groupId><artifactId>application-parent-consumer</artifactId><version>1.6.2</version><packaging>jar</packaging>
+  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-application-parent</artifactId><version>1.6.3</version><relativePath/></parent>
+  <groupId>nl.hauntedmc.platform.verification</groupId><artifactId>application-parent-consumer</artifactId><version>1.6.3</version><packaging>jar</packaging>
   <dependencies>
     <dependency><groupId>nl.hauntedmc.featureframework</groupId><artifactId>featureframework-toolkit</artifactId></dependency>
     <dependency><groupId>nl.hauntedmc.featureframework</groupId><artifactId>featureframework-cluster</artifactId></dependency>

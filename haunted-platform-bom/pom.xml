@@ -4,7 +4,7 @@
     <parent>
         <groupId>nl.hauntedmc.platform</groupId>
         <artifactId>haunted-platform</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
     </parent>
     <artifactId>haunted-platform-bom</artifactId>
     <packaging>pom</packaging>
@@ -12,7 +12,7 @@
     <description>Validated public HauntedMC foundation-library versions.</description>
     <dependencyManagement>
         <dependencies>
-            <dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-dependencies-bom</artifactId><version>1.6.2</version><type>pom</type><scope>import</scope></dependency>
+            <dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-dependencies-bom</artifactId><version>1.6.3</version><type>pom</type><scope>import</scope></dependency>
             <dependency><groupId>nl.hauntedmc.featureframework</groupId><artifactId>featureframework-bom</artifactId><version>${haunted.featureframework.version}</version><type>pom</type><scope>import</scope></dependency>
             <dependency><groupId>nl.hauntedmc.observability</groupId><artifactId>haunted-observability-bom</artifactId><version>${haunted.observability.version}</version><type>pom</type><scope>import</scope></dependency>
 

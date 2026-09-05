@@ -14,7 +14,7 @@ HauntedPlatform releases are compatibility decisions, not routine bulk dependenc
    The script updates the root version, SCM tag, internal parent/BOM references, external verification fixtures, and README examples. It refuses a dirty tracked worktree and fails if it leaves an old Platform version in those files.
 
    It intentionally does **not** change `CHANGELOG.md`, third-party dependency catalog entries, or the public foundation-library versions in `haunted-platform-bom`. Review and edit those deliberately.
-3. Make the intended policy or dependency-management changes. Keep runtime/gameplay and project-specific compatibility concerns out of this repository, and add a concise `CHANGELOG.md` entry describing the impact and any consumer action.
+3. Make the intended policy or dependency-management changes. Keep runtime/gameplay and project-specific compatibility concerns out of this repository, and describe the impact and any consumer action in the reviewed release commit or pull request.
 4. Run the complete validation:
 
    ```bash
