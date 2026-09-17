@@ -34,7 +34,11 @@ jobs:
         shell: bash
         run: |
           project_version="$(mvn -q -ntp -DforceStdout help:evaluate -Dexpression=project.version | tail -n 1)"
-          test "$project_version" = "${GITHUB_REF_NAME#v}" || { echo "Tag and project versions differ." >&2; exit 1; }
+          expected_version="${GITHUB_REF_NAME#v}"
+          if [[ "$project_version" != "$expected_version" ]]; then
+            echo "::error title=Release version mismatch::Tag ${GITHUB_REF_NAME} expects project version ${expected_version}, but pom.xml declares ${project_version}. Run scripts/prepare-release.sh ${expected_version}, merge that release-preparation commit, and only then create the tag."
+            exit 1
+          fi
       - name: Install and verify release consumer contracts
         env:
           VERIFICATION_REPOSITORY: ${{ runner.temp }}/haunted-platform-release-m2
