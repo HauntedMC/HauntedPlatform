@@ -45,6 +45,7 @@ files=(
     README.md
     haunted-build-rules/pom.xml
     haunted-dependencies-bom/pom.xml
+    haunted-minecraft-bom/pom.xml
     haunted-parent/pom.xml
     haunted-library-parent/pom.xml
     haunted-platform-bom/pom.xml
@@ -68,4 +69,4 @@ fi
 
 git diff --check
 printf 'Prepared HauntedPlatform %s -> %s.\n' "$current_version" "$next_version"
-printf 'Next: review the diff, update CHANGELOG.md and any deliberately changed dependency/BOM versions, then run the release validation.\n'
+printf 'Next: review the diff and any deliberately changed dependency/BOM versions, then run the release validation.\n'

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
+  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>1.6.10</version></parent>
+  <artifactId>haunted-minecraft-bom</artifactId><packaging>pom</packaging><name>HauntedPlatform Minecraft integrations BOM</name><description>Shared Paper, Velocity, and Minecraft plugin API versions.</description>
+  <dependencyManagement><dependencies>
+    <!-- Shared server and proxy APIs. Keep their versions in the platform parent. -->
+    <dependency><groupId>io.papermc.paper</groupId><artifactId>paper-api</artifactId><version>${haunted.paper.version}</version></dependency>
+    <dependency><groupId>com.velocitypowered</groupId><artifactId>velocity-api</artifactId><version>${haunted.velocity.version}</version></dependency>
+    <dependency><groupId>com.velocitypowered</groupId><artifactId>velocity-brigadier</artifactId><version>${haunted.velocity.brigadier.version}</version></dependency>
+    <dependency><groupId>com.mojang</groupId><artifactId>brigadier</artifactId><version>${haunted.brigadier.version}</version></dependency>
+    <dependency><groupId>me.clip</groupId><artifactId>placeholderapi</artifactId><version>${haunted.placeholderapi.version}</version></dependency>
+    <dependency><groupId>com.viaversion</groupId><artifactId>viaversion-api</artifactId><version>${haunted.viaversion.version}</version></dependency>
+    <dependency><groupId>com.github.retrooper</groupId><artifactId>packetevents-spigot</artifactId><version>${haunted.packetevents.version}</version></dependency>
+    <dependency><groupId>com.github.retrooper</groupId><artifactId>packetevents-api</artifactId><version>${haunted.packetevents.version}</version></dependency>
+    <dependency><groupId>net.citizensnpcs</groupId><artifactId>citizens-main</artifactId><version>${haunted.citizens.version}</version></dependency>
+    <dependency><groupId>com.github.MilkBowl</groupId><artifactId>VaultAPI</artifactId><version>${haunted.vault.version}</version></dependency>
+    <dependency><groupId>net.luckperms</groupId><artifactId>api</artifactId><version>${haunted.luckperms.version}</version></dependency>
+    <dependency><groupId>me.libraryaddict.disguises</groupId><artifactId>libsdisguises</artifactId><version>${haunted.libsdisguises.version}</version></dependency>
+    <dependency><groupId>com.sk89q.worldguard</groupId><artifactId>worldguard-bukkit</artifactId><version>${haunted.worldguard.version}</version></dependency>
+    <dependency><groupId>com.sk89q.worldguard</groupId><artifactId>worldguard-core</artifactId><version>${haunted.worldguard.version}</version></dependency>
+    <dependency><groupId>com.sk89q.worldedit</groupId><artifactId>worldedit-core</artifactId><version>${haunted.worldedit.version}</version></dependency>
+    <dependency><groupId>com.sk89q.worldedit</groupId><artifactId>worldedit-bukkit</artifactId><version>${haunted.worldedit.version}</version></dependency>
+    <dependency><groupId>com.fastasyncworldedit</groupId><artifactId>FastAsyncWorldEdit-Core</artifactId><version>${haunted.fawe.version}</version></dependency>
+    <dependency><groupId>com.fastasyncworldedit</groupId><artifactId>FastAsyncWorldEdit-Bukkit</artifactId><version>${haunted.fawe.version}</version></dependency>
+    <dependency><groupId>com.github.TechFortress</groupId><artifactId>GriefPrevention</artifactId><version>${haunted.griefprevention.version}</version></dependency>
+    <dependency><groupId>net.essentialsx</groupId><artifactId>EssentialsX</artifactId><version>${haunted.essentialsx.version}</version></dependency>
+    <dependency><groupId>de.tr7zw</groupId><artifactId>item-nbt-api</artifactId><version>${haunted.item.nbt.api.version}</version></dependency>
+    <dependency><groupId>org.mockbukkit.mockbukkit</groupId><artifactId>mockbukkit-v26.2</artifactId><version>${haunted.mockbukkit.version}</version></dependency>
+  </dependencies></dependencyManagement>
+</project>

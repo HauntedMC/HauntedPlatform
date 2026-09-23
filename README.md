@@ -7,11 +7,12 @@ HauntedPlatform is the Java build and dependency-management standard for Haunted
 | `haunted-parent` | Java 25, plugin policy, Enforcer, Checkstyle, generic JaCoCo, flattening, and deployment policy. |
 | `haunted-library-parent` | Parent for reusable libraries; imports only `haunted-dependencies-bom`. |
 | `haunted-application-parent` | Parent for deployable HauntedMC applications; imports `haunted-platform-bom`. |
-| `haunted-dependencies-bom` | Shared platform-neutral third-party versions, including OpenTelemetry, Hibernate, and other dependencies shared across projects. |
+| `haunted-dependencies-bom` | Platform-neutral third-party versions, including OpenTelemetry and Hibernate. |
+| `haunted-minecraft-bom` | Paper, Velocity, and Minecraft plugin API versions. Imported by the application BOM. |
 | `haunted-platform-bom` | Validated public HauntedMC foundation-library versions, including FeatureFramework and HauntedObservability through their published BOMs plus all regular DataProvider/DataRegistry/Theme modules. |
 | `haunted-build-rules` | Packaged Checkstyle configuration consumed by the shared parent. |
 
-FeatureFramework, DataProvider, DataRegistry, HauntedObservability, and Theme use `haunted-library-parent`. ServerFeatures and ProxyFeatures use `haunted-application-parent`. Runtime targets, shading, acceptance tests, project metadata, release locations, and coverage thresholds remain in their owning repositories.
+FeatureFramework, DataProvider, DataRegistry, HauntedObservability, and Theme use `haunted-library-parent`. ServerFeatures and ProxyFeatures use `haunted-application-parent`. Paper and Velocity API versions, acceptance runtime builds and checksums, and shared integration libraries are selected in this repository. Shading, acceptance tests, project metadata, release locations, and coverage thresholds remain in their owning repositories.
 
 ## Maven consumption
 
@@ -46,7 +47,7 @@ Reusable libraries inherit the library parent and must not import the ecosystem 
 <parent>
   <groupId>nl.hauntedmc.platform</groupId>
   <artifactId>haunted-library-parent</artifactId>
-  <version>1.6.9</version>
+  <version>1.6.10</version>
   <relativePath/>
 </parent>
 ```
@@ -57,12 +58,14 @@ Deployable HauntedMC applications inherit the application parent. It imports the
 <parent>
   <groupId>nl.hauntedmc.platform</groupId>
   <artifactId>haunted-application-parent</artifactId>
-  <version>1.6.9</version>
+  <version>1.6.10</version>
   <relativePath/>
 </parent>
 ```
 
-Use `haunted-dependencies-bom` directly only for a build that intentionally does not inherit a HauntedPlatform parent. Libraries keep their own public compatibility versions where necessary; applications may retain local aliases such as `${featureframework.version}` only when they forward a `${haunted.*}` Platform property. Applications inheriting `haunted-application-parent` must not re-import the FeatureFramework or HauntedObservability BOMs, independently pin HauntedObservability modules, or override the Platform-selected DataProvider/DataRegistry foundation versions without an explicit compatibility reason. Do not re-import Adventure, OpenTelemetry, or other common third-party BOMs either.
+Use `haunted-dependencies-bom` directly only for a build that intentionally does not inherit a HauntedPlatform parent. Reusable libraries declare the HauntedMC API versions they compile against in their own root POMs, allowing them to release before Platform updates its tested application set. Applications may retain local aliases such as `${featureframework.version}` only when they forward a `${haunted.*}` Platform property. Applications inheriting `haunted-application-parent` must not re-import the FeatureFramework or HauntedObservability BOMs, independently pin HauntedObservability modules, or override the Platform-selected DataProvider/DataRegistry foundation versions without an explicit compatibility reason. Do not re-import Adventure, OpenTelemetry, or other common third-party BOMs either.
+
+Update shared library and runtime versions in the root `pom.xml`, then release a new HauntedPlatform parent. Consumers inherit the selected versions when they update their parent release; Maven keeps each parent release immutable so existing builds remain reproducible. The `haunted-dependencies-bom` manages platform-neutral third-party coordinates, `haunted-minecraft-bom` manages Minecraft integrations, and `haunted-platform-bom` manages shared HauntedMC modules including ProxyFeatures contracts.
 
 HauntedPlatform selects the HauntedObservability release through `${haunted.observability.version}` and imports `haunted-observability-bom`; that BOM owns alignment of HauntedObservability's own modules only. Platform remains the compatibility authority for FeatureFramework, DataProvider, DataRegistry, HauntedObservability, and shared third-party versions as one tested application dependency set.
 
@@ -78,6 +81,6 @@ The application parent contains direct Adventure and common-library constraints 
 
 ## Release policy
 
-HauntedPlatform releases are immutable Git tags and GitHub Packages versions. Consumers use released parent artifact versions and immutable reusable-workflow tags such as `@v1.6.9`, never `@main`. A platform BOM release names only already published public foundation artifacts; public-library releases are aligned by a later Platform release.
+HauntedPlatform releases are immutable Git tags and GitHub Packages versions. Consumers use released parent artifact versions and immutable reusable-workflow tags such as `@v1.6.10`, never `@main`. A platform BOM release names only already published public foundation artifacts; public-library releases are aligned by a later Platform release.
 
 For the maintained release procedure and the guarded version-update command, see [docs/releasing.md](docs/releasing.md).
