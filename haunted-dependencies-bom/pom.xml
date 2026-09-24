@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
-  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>1.6.9</version></parent>
-  <artifactId>haunted-dependencies-bom</artifactId><packaging>pom</packaging><name>HauntedPlatform third-party dependencies BOM</name><description>Common, platform-neutral third-party dependency versions.</description>
+  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>1.6.10</version></parent>
+  <artifactId>haunted-dependencies-bom</artifactId><packaging>pom</packaging><name>HauntedPlatform third-party dependencies BOM</name><description>Platform-neutral third-party dependency versions.</description>
   <dependencyManagement><dependencies>
     <dependency><groupId>net.kyori</groupId><artifactId>adventure-bom</artifactId><version>${haunted.adventure.version}</version><type>pom</type><scope>import</scope></dependency>
     <dependency><groupId>io.opentelemetry</groupId><artifactId>opentelemetry-bom</artifactId><version>${haunted.opentelemetry.version}</version><type>pom</type><scope>import</scope></dependency>
@@ -23,5 +23,17 @@
     <dependency><groupId>org.hibernate.orm</groupId><artifactId>hibernate-core</artifactId><version>${haunted.hibernate.version}</version></dependency>
     <dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers-bom</artifactId><version>${haunted.testcontainers.version}</version><type>pom</type><scope>import</scope></dependency>
     <dependency><groupId>org.yaml</groupId><artifactId>snakeyaml</artifactId><version>${haunted.snakeyaml.version}</version></dependency>
+    <dependency><groupId>net.bytebuddy</groupId><artifactId>byte-buddy</artifactId><version>${haunted.bytebuddy.version}</version></dependency>
+    <dependency><groupId>net.bytebuddy</groupId><artifactId>byte-buddy-agent</artifactId><version>${haunted.bytebuddy.version}</version></dependency>
+    <dependency><groupId>org.apache.commons</groupId><artifactId>commons-text</artifactId><version>${haunted.commons.text.version}</version></dependency>
+    <dependency><groupId>org.checkerframework</groupId><artifactId>checker-qual</artifactId><version>${haunted.checker.qual.version}</version></dependency>
+    <dependency><groupId>org.joml</groupId><artifactId>joml</artifactId><version>${haunted.joml.version}</version></dependency>
+    <dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId><version>${haunted.guava.version}</version></dependency>
+    <dependency><groupId>com.google.inject</groupId><artifactId>guice</artifactId><version>${haunted.guice.version}</version></dependency>
+    <dependency><groupId>com.github.ben-manes.caffeine</groupId><artifactId>caffeine</artifactId><version>${haunted.caffeine.version}</version></dependency>
+    <dependency><groupId>com.mysql</groupId><artifactId>mysql-connector-j</artifactId><version>${haunted.mysql.connector.version}</version></dependency>
+    <dependency><groupId>com.zaxxer</groupId><artifactId>HikariCP</artifactId><version>${haunted.hikari.version}</version></dependency>
+    <dependency><groupId>org.mongodb</groupId><artifactId>mongodb-driver-sync</artifactId><version>${haunted.mongodb.driver.version}</version></dependency>
+    <dependency><groupId>redis.clients</groupId><artifactId>jedis</artifactId><version>${haunted.jedis.version}</version></dependency>
   </dependencies></dependencyManagement>
 </project>

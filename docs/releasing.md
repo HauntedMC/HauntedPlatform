@@ -13,7 +13,7 @@ HauntedPlatform releases are compatibility decisions, not routine bulk dependenc
 
    The script updates the root version, SCM tag, internal parent/BOM references, external verification fixtures, and README examples. It refuses a dirty tracked worktree and fails if it leaves an old Platform version in those files.
 
-   It intentionally does **not** change `CHANGELOG.md`, third-party dependency catalog entries, or the public foundation-library versions in `haunted-platform-bom`. Review and edit those deliberately.
+   It intentionally does **not** change dependency catalog entries or the public foundation-library versions in `haunted-platform-bom`. Review and edit those deliberately.
 3. Make the intended policy or dependency-management changes. Keep runtime/gameplay and project-specific compatibility concerns out of this repository, and describe the impact and any consumer action in the reviewed release commit or pull request.
 4. Run the complete validation:
 
@@ -51,4 +51,4 @@ FeatureFramework and HauntedObservability own alignment of their own modules thr
 
 Applications inheriting `haunted-application-parent` must consume the Platform-selected ecosystem rather than re-importing FeatureFramework or HauntedObservability BOMs or independently pinning their module versions. Reusable libraries continue to inherit `haunted-library-parent`, which imports only the platform-neutral third-party BOM.
 
-After the Platform release has passed its post-deployment smoke test, update consumer repositories to the new parent/BOM version and run each repository's full CI and runtime/acceptance profiles. Keep applications' Paper/Velocity targets, external plugin APIs, shading, coverage gates, and other local compatibility controls in the application repository.
+After the Platform release has passed its post-deployment smoke test, update consumer repositories to the new parent/BOM version and run each repository's full CI and runtime/acceptance profiles. Paper/Velocity targets and shared plugin API versions belong to Platform's Minecraft BOM. Keep shading, coverage gates, and project-specific compatibility controls in the application repository. Dependabot may propose pinned parent updates, but review and test each application against the published release before merging.

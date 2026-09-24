@@ -4,7 +4,7 @@
     <parent>
         <groupId>nl.hauntedmc.platform</groupId>
         <artifactId>haunted-platform</artifactId>
-        <version>1.6.9</version>
+        <version>1.6.10</version>
     </parent>
     <artifactId>haunted-platform-bom</artifactId>
     <packaging>pom</packaging>
@@ -12,7 +12,8 @@
     <description>Validated public HauntedMC foundation-library versions.</description>
     <dependencyManagement>
         <dependencies>
-            <dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-dependencies-bom</artifactId><version>1.6.9</version><type>pom</type><scope>import</scope></dependency>
+            <dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-dependencies-bom</artifactId><version>1.6.10</version><type>pom</type><scope>import</scope></dependency>
+            <dependency><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-minecraft-bom</artifactId><version>1.6.10</version><type>pom</type><scope>import</scope></dependency>
             <dependency><groupId>nl.hauntedmc.featureframework</groupId><artifactId>featureframework-bom</artifactId><version>${haunted.featureframework.version}</version><type>pom</type><scope>import</scope></dependency>
             <dependency><groupId>nl.hauntedmc.observability</groupId><artifactId>haunted-observability-bom</artifactId><version>${haunted.observability.version}</version><type>pom</type><scope>import</scope></dependency>
 
@@ -32,6 +33,9 @@
 
             <dependency><groupId>nl.hauntedmc.theme</groupId><artifactId>hauntedmc-theme-palette</artifactId><version>${haunted.theme.version}</version></dependency>
             <dependency><groupId>nl.hauntedmc.theme</groupId><artifactId>hauntedmc-theme-featureframework</artifactId><version>${haunted.theme.version}</version></dependency>
+            <dependency><groupId>nl.hauntedmc.proxyfeatures</groupId><artifactId>proxyfeatures-api</artifactId><version>${haunted.proxyfeatures.version}</version></dependency>
+            <dependency><groupId>nl.hauntedmc.proxyfeatures</groupId><artifactId>proxyfeatures-contracts</artifactId><version>${haunted.proxyfeatures.version}</version></dependency>
+            <dependency><groupId>nl.hauntedmc.proxyfeatures</groupId><artifactId>proxyfeatures-platform-velocity</artifactId><version>${haunted.proxyfeatures.version}</version></dependency>
         </dependencies>
     </dependencyManagement>
 </project>
