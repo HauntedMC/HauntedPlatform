@@ -1,0 +1,53 @@
+name: Reconcile internal dependency PRs
+
+on:
+  repository_dispatch:
+    types: [internal-release]
+  workflow_dispatch:
+    inputs:
+      producer:
+        description: Released repository or Theme module
+        required: true
+        type: string
+      version:
+        description: Verified release version
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: internal-dependency-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/create-github-app-token@v3
+        id: app
+        with:
+          app-id: ${{ vars.HAUNTEDMC_RELEASE_APP_ID }}
+          private-key: ${{ secrets.HAUNTEDMC_RELEASE_APP_PRIVATE_KEY }}
+          owner: HauntedMC
+      - name: Set up JDK 25 for version helpers
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          server-id: github
+          server-username: PACKAGES_USER
+          server-password: PACKAGES_TOKEN
+      - name: Reconcile topological consumer PRs
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME }}
+          PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN }}
+          RELEASE_PAYLOAD: ${{ toJSON(github.event.client_payload || inputs) }}
+        run: python3 scripts/update-consumers.py

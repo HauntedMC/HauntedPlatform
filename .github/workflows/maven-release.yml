@@ -1,62 +1,94 @@
-name: GitHub Packages release
+name: Release Package
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
-  release:
+  gate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    env:
-      PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME }}
-      PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN }}
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      - id: version
+        name: Detect a reviewed version change
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: python3 scripts/release-gate.py pom.xml
+
+  publish:
+    needs: gate
+    if: needs.gate.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      PACKAGES_USER: ${{ secrets.HAUNTEDMC_PACKAGES_USERNAME }}
+      PACKAGES_TOKEN: ${{ secrets.HAUNTEDMC_PACKAGES_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+      PLATFORM_ACCEPTANCE_KEEP_WORK_DIRECTORY: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up JDK 25 and Maven package credentials
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: '25'
           cache: maven
-      - name: Validate GitHub Packages credentials
-        shell: bash
+          server-id: github
+          server-username: PACKAGES_USER
+          server-password: PACKAGES_TOKEN
+      - name: Require package credentials
         run: |
-          test -n "$PACKAGES_USER" || { echo "Missing HAUNTEDMC_PACKAGES_USERNAME." >&2; exit 1; }
-          test -n "$PACKAGES_TOKEN" || { echo "Missing HAUNTEDMC_PACKAGES_TOKEN." >&2; exit 1; }
-      - name: Validate release version
-        shell: bash
-        run: |
-          project_version="$(mvn -q -ntp -DforceStdout help:evaluate -Dexpression=project.version | tail -n 1)"
-          expected_version="${GITHUB_REF_NAME#v}"
-          if [[ "$project_version" != "$expected_version" ]]; then
-            echo "::error title=Release version mismatch::Tag ${GITHUB_REF_NAME} expects project version ${expected_version}, but pom.xml declares ${project_version}. Run scripts/prepare-release.sh ${expected_version}, merge that release-preparation commit, and only then create the tag."
+          if [[ -z "$PACKAGES_USER" || -z "$PACKAGES_TOKEN" ]]; then
+            echo 'HAUNTEDMC_PACKAGES_USERNAME and HAUNTEDMC_PACKAGES_TOKEN are required.' >&2
             exit 1
           fi
-      - name: Install and verify release consumer contracts
+      - name: Verify the Platform reactor and consumer contracts
         env:
           VERIFICATION_REPOSITORY: ${{ runner.temp }}/haunted-platform-release-m2
         run: |
-          rm -rf "$VERIFICATION_REPOSITORY"
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" clean install
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/bom-consumer/pom.xml clean verify
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/library-parent-consumer/pom.xml clean verify
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml clean verify
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-graph-regression/pom.xml clean verify
-      - name: Publish the verified release reactor
+          for fixture in bom-consumer library-parent-consumer application-parent-consumer; do
+            mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f "verification/$fixture/pom.xml" clean verify
+          done
+      - name: Publish the verified reactor
         run: mvn -U -B -ntp -DdeployAtEnd=true clean deploy
-      - name: Verify deployed consumer contracts
+      - name: Resolve every published artifact from a fresh Maven repository
+        run: python3 scripts/verify-published.py "${{ needs.gate.outputs.version }}" HauntedPlatform
+      - name: Create the release tag only after publication is resolvable
+        run: gh release create "${{ needs.gate.outputs.tag }}" --target "$GITHUB_SHA" --title "HauntedPlatform ${{ needs.gate.outputs.tag }}" --generate-notes
+      - name: Create cross-repository GitHub App token
+        id: app
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.HAUNTEDMC_RELEASE_APP_ID }}
+          private-key: ${{ secrets.HAUNTEDMC_RELEASE_APP_PRIVATE_KEY }}
+          owner: HauntedMC
+      - name: Queue reviewed downstream update PRs
         env:
-          VERIFICATION_REPOSITORY: ${{ runner.temp }}/haunted-platform-verification-m2
+          DISPATCH_TOKEN: ${{ steps.app.outputs.token }}
+          RELEASE_VERSION: ${{ needs.gate.outputs.version }}
         run: |
-          rm -rf "$VERIFICATION_REPOSITORY"
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/bom-consumer/pom.xml clean verify
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/library-parent-consumer/pom.xml clean verify
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml clean verify
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-graph-regression/pom.xml clean verify
+          GH_TOKEN="$DISPATCH_TOKEN" gh api repos/HauntedMC/HauntedPlatform/dispatches \
+            --method POST --input - <<EOF
+          {"event_type":"internal-release","client_payload":{"producer":"HauntedPlatform","version":"$RELEASE_VERSION"}}
+          EOF

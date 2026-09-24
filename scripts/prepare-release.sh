@@ -48,13 +48,11 @@ files=(
     haunted-minecraft-bom/pom.xml
     haunted-parent/pom.xml
     haunted-library-parent/pom.xml
-    haunted-platform-bom/pom.xml
     haunted-application-parent/pom.xml
     verification/pom.xml
     verification/bom-consumer/pom.xml
     verification/library-parent-consumer/pom.xml
     verification/application-parent-consumer/pom.xml
-    verification/application-graph-regression/pom.xml
 )
 
 for file in "${files[@]}"; do
