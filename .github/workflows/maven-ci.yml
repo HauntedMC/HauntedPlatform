@@ -13,6 +13,10 @@ on:
         required: true
       PACKAGES_TOKEN:
         required: true
+      HAUNTEDMC_PACKAGES_USERNAME:
+        required: false
+      HAUNTEDMC_PACKAGES_TOKEN:
+        required: false
   push:
     branches: [main]
   pull_request:
@@ -33,6 +37,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Test release gate and dependency reconciliation
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
       - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
@@ -82,7 +88,5 @@ jobs:
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/bom-consumer/pom.xml clean verify
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/library-parent-consumer/pom.xml clean verify
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml clean verify
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-graph-regression/pom.xml clean verify
 
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml dependency:tree help:effective-pom
-          mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-graph-regression/pom.xml dependency:tree help:effective-pom

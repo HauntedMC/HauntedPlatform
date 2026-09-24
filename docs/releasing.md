@@ -1,54 +1,63 @@
-# Updating and releasing HauntedPlatform
+# Release and internal dependency rollout
 
-HauntedPlatform releases are compatibility decisions, not routine bulk dependency upgrades. Make a small, reviewed change for each policy, plugin, third-party dependency, or foundation-library alignment change.
+HauntedPlatform owns shared external dependencies, Paper/Velocity API and runtime versions, Maven plugin versions, and build policy. It does not own internal HauntedMC artifact versions. Each library's root POM declares the internal API versions it compiles against; each application root POM imports the producing libraries' published BOMs and selects its own internal version set.
 
-## Prepare a release
+## Release contract
 
-1. Start from current `main` on a clean worktree and choose the next immutable `major.minor.patch` version.
-2. Update Platform's own version references before making other tracked changes:
+1. Prepare a semantic version bump in the producer's PR. For Platform, run `scripts/prepare-release.sh X.Y.Z` in a clean worktree. For the other projects, run `./update_version.sh patch` (or `major`/`minor`); Theme uses `./update_version.sh palette patch` or `adapter patch`. The helpers edit files only. Review and merge the PR after its normal CI passes.
+2. A version change on `main` starts the release workflow. `workflow_dispatch` can retry a failed release. The workflow runs the producer's release profiles and platform acceptance, deploys the reactor with `deployAtEnd`, and resolves each deployed coordinate from an empty Maven repository. Acceptance fixture modules are not deployed.
+3. Only after resolution succeeds does the workflow create the GitHub Release and tag. A partial deploy failure may leave immutable package coordinates; inspect what was published before retrying. Never overwrite a published version. If retry cannot finish the same version, publish a new patch version and document the superseded partial release.
+4. The producer sends `repository_dispatch` to HauntedPlatform with a GitHub App installation token. The reconciler verifies a matching GitHub Release is visible, reads the latest stable releases, and opens or refreshes one bot-owned PR per ready consumer. It waits when an upstream update PR is open or a merged upstream version has not been tagged. PR CI tests the published package. Nothing merges automatically.
+5. A merged consumer version bump repeats the same publication gate. This proceeds through the graph without Platform selecting internal versions or a tag racing a downstream PR.
 
-   ```bash
-   scripts/prepare-release.sh 1.4.0
-   ```
+The owner-specific release workflow remains the only publication path. Do not manually push `vX.Y.Z`, `palette-vX.Y.Z`, or `adapter-vX.Y.Z` tags. The release job creates them after verification. An ordinary `main` push without a version change does nothing. Rerunning after a completed tag also does nothing. The GitHub App event is intentionally separate from `GITHUB_TOKEN`, whose events do not trigger other workflows reliably.
 
-   The script updates the root version, SCM tag, internal parent/BOM references, external verification fixtures, and README examples. It refuses a dirty tracked worktree and fails if it leaves an old Platform version in those files.
+## Dependency graph
 
-   It intentionally does **not** change dependency catalog entries or the public foundation-library versions in `haunted-platform-bom`. Review and edit those deliberately.
-3. Make the intended policy or dependency-management changes. Keep runtime/gameplay and project-specific compatibility concerns out of this repository, and describe the impact and any consumer action in the reviewed release commit or pull request.
-4. Run the complete validation:
+```mermaid
+flowchart LR
+  Platform[HauntedPlatform external policy] --> Palette[Theme palette]
+  Platform --> DP[DataProvider]
+  Palette --> DP
+  Palette --> DR[DataRegistry]
+  DP --> DR
+  DP --> FF[FeatureFramework]
+  DR --> FF
+  FF --> Adapter[Theme FF adapter]
+  Palette --> Adapter
+  DP --> Obs[Observability]
+  DR --> Obs
+  FF --> Obs
+  DP --> Proxy[ProxyFeatures]
+  DR --> Proxy
+  FF --> Proxy
+  Palette --> Proxy
+  Adapter --> Proxy
+  Obs --> Proxy
+  Proxy --> Server[ServerFeatures]
+  DP --> Server
+  DR --> Server
+  FF --> Server
+  Palette --> Server
+  Adapter --> Server
+  Obs --> Server
+```
 
-   ```bash
-   mvn -U -B -ntp clean verify
-   mvn -U -B -ntp clean install
-   mvn -U -B -ntp dependency:tree help:effective-pom
+Platform parent upgrades are proposed to all projects, but the bot starts with Theme palette and DataProvider, then waits for their published updates before preparing dependent projects. A DataProvider API update follows DataRegistry, FeatureFramework, the adapter and Observability, ProxyFeatures, and ServerFeatures. Independent ready branches can advance in parallel. Theme palette and adapter have separate versions and release tags even though they share a repository.
 
-   mvn -U -B -ntp -f verification/bom-consumer/pom.xml clean verify
-   mvn -U -B -ntp -f verification/library-parent-consumer/pom.xml clean verify
-   mvn -U -B -ntp -f verification/application-parent-consumer/pom.xml clean verify
-   mvn -U -B -ntp -f verification/application-graph-regression/pom.xml clean verify
-   ```
+The reconciler uses the fixed `automation/internal-dependencies` branch in each repository and module-specific branches in Theme. A new release refreshes the open PR with all published versions available at that point. It will not propose an unpublished dependency. A consumer keeps its own patch version and test gate; a critical API update therefore needs one reviewed patch per affected consumer, without an intermediate Platform release or speculative dependency PR.
 
-   For the strongest local check, use one empty `-Dmaven.repo.local=<temporary-directory>` for `clean install` and all four fixture commands, exactly as CI does.
-5. Open and merge the Platform PR. Do not publish from a branch.
-6. Create and push an annotated tag that exactly matches the root version:
+## GitHub App and package credentials
 
-   ```bash
-   git tag -a v1.4.0 -m 'HauntedPlatform 1.4.0'
-   git push origin v1.4.0
-   ```
+Create one organization-owned GitHub App, install it on HauntedPlatform, DataProvider, DataRegistry, FeatureFramework, Theme, HauntedObservability, ProxyFeatures, and ServerFeatures, and grant repository **Contents: read/write** and **Pull requests: read/write**. Add the organization Actions variable `HAUNTEDMC_RELEASE_APP_ID` and organization secret `HAUNTEDMC_RELEASE_APP_PRIVATE_KEY` with access to those eight repositories. The release workflows use the App to dispatch the central updater; the updater uses it to push bot branches and open PRs. Keep `HAUNTEDMC_PACKAGES_USERNAME` and `HAUNTEDMC_PACKAGES_TOKEN` as the separate Maven GitHub Packages credentials with read/write package access. The App does not need package publication permission.
 
-   The tag-only release workflow validates the version, installs and tests against an isolated repository, deploys the entire reactor atomically with `-DdeployAtEnd=true`, and then tests the deployed artifacts from a fresh repository. It is the only publication path.
+Protect `main` in every repository with required PR checks and review. Allow the App to push only bot branches, not bypass branch protection. Because release workflows use `contents: write` for the post-publication tag, the repository's Actions policy must allow tag creation. If App setup or dispatch fails after a package and tag are complete, rerun HauntedPlatform's **Reconcile internal dependency PRs** workflow with the released producer and version; it is idempotent. If a publication fails before the tag, retry the producer workflow after diagnosing the failure.
 
-## Updating the ecosystem BOM
+## 2.0.0 migration order
 
-Release FeatureFramework, DataProvider, DataRegistry, HauntedObservability, or Theme first. Only after a public version is published may a later HauntedPlatform release update the corresponding `haunted-platform-bom` property or imported foundation BOM. Never put an unreleased foundation-library version in the Platform BOM.
+1. Install the GitHub App and expose its variable and private-key secret to all eight repositories before merging a release workflow. Merge and publish DataProvider 3.4.4 and DataRegistry 1.18.5 BOM additions while they still use the published Platform 1.6.10 parent. Their BOMs manage only their own modules.
+2. Merge the Theme split and publish `palette-v1.2.1` before `adapter-v1.2.1`; the adapter depends on the published palette. Theme's CI can build the two-module reactor before either release.
+3. Merge and publish HauntedPlatform 2.0.0, which removes the internal ecosystem BOM and installs the GitHub App reconciler. Earlier release notifications sent before this workflow exists do not create PRs; the Platform 2.0.0 notification reconciles every latest stable release. The removal is a major version change; 1.6.10 remains available for existing consumers.
+4. Let the bot propose parent and internal-version updates in graph order. FeatureFramework and Observability release only when their own consumed API or parent version changes. ProxyFeatures and ServerFeatures then adopt published BOMs and their own selected versions. Existing staged downstream changes should be rebased onto those bot PRs or superseded before merging; no PR should run against an unreleased 3.4.4, 1.18.5, 1.2.1, or 2.0.0 artifact.
 
-Release the foundation projects in dependency order, not alphabetically. A project must only be tagged after every externally resolved HauntedMC dependency in its release POM is publicly available. For the multi-proxy release, the order is DataProvider, DataRegistry, FeatureFramework, HauntedPlatform, ProxyFeatures, and ServerFeatures. DataRegistry depends on the new DataProvider release; FeatureFramework depends on both; the Platform BOM names all three; ProxyFeatures consumes that published BOM; and ServerFeatures consumes ProxyFeatures.
-
-Foundation libraries keep using an already-published `haunted-library-parent` while they are released. They do not advance to the Platform version that catalogs their own release. Only deployable applications advance to the new `haunted-application-parent` after the corresponding Platform BOM has passed publication and fresh-repository verification.
-
-FeatureFramework and HauntedObservability own alignment of their own modules through their published BOMs. HauntedPlatform selects the exact released BOM versions and remains the compatibility authority for the complete application set. DataProvider and DataRegistry modules remain directly aligned in `haunted-platform-bom` until those projects deliberately publish their own BOMs.
-
-Applications inheriting `haunted-application-parent` must consume the Platform-selected ecosystem rather than re-importing FeatureFramework or HauntedObservability BOMs or independently pinning their module versions. Reusable libraries continue to inherit `haunted-library-parent`, which imports only the platform-neutral third-party BOM.
-
-After the Platform release has passed its post-deployment smoke test, update consumer repositories to the new parent/BOM version and run each repository's full CI and runtime/acceptance profiles. Paper/Velocity targets and shared plugin API versions belong to Platform's Minecraft BOM. Keep shading, coverage gates, and project-specific compatibility controls in the application repository. Dependabot may propose pinned parent updates, but review and test each application against the published release before merging.
+For a one-off release, use the same graph. The updater may be manually dispatched from HauntedPlatform with a known published producer/version to recover a missed notification. It reconciles current stable releases across the graph, not only the supplied producer.
