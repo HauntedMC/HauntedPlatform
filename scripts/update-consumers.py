@@ -2,8 +2,8 @@
 """Reconcile reviewed internal-dependency PRs after a verified package release.
 
 Runs in the HauntedPlatform repository with a GitHub App installation token.
-It never merges or publishes a consumer. Each consumer's own CI and release
-workflow remain the authority for that repository.
+It never merges or publishes a consumer. ProxyFeatures and ServerFeatures
+temporarily verify locally while their GitHub Actions are disabled.
 """
 import base64
 import json
@@ -16,6 +16,7 @@ from pathlib import Path
 
 ORG = "HauntedMC"
 BRANCH = "automation/internal-dependencies"
+LOCAL_VERIFICATION_TARGETS = {"proxyfeatures", "serverfeatures"}
 PROJECTS = {
     "platform": ("HauntedPlatform", "pom.xml", "v"),
     "palette": ("Theme", "hauntedmc-theme-palette/pom.xml", "palette-v"),
@@ -128,7 +129,7 @@ def pending(key, versions):
         return True
     pom = main_pom(key)
     latest = versions.get(key)
-    if latest and semver(current_revision(pom)) > semver(latest):
+    if key not in LOCAL_VERIFICATION_TARGETS and latest and semver(current_revision(pom)) > semver(latest):
         return True
     platform = versions.get("platform")
     if platform:
@@ -181,7 +182,7 @@ def reconcile(key, properties, module, versions):
     repo, pom_path, _ = PROJECTS[key]
     base_pom = main_pom(key)
     own_release = versions.get(key)
-    if own_release and semver(current_revision(base_pom)) > semver(own_release):
+    if key not in LOCAL_VERIFICATION_TARGETS and own_release and semver(current_revision(base_pom)) > semver(own_release):
         print(f"{repo}/{key}: waiting for its merged release to publish", flush=True)
         return
     if "nl.hauntedmc.platform" not in base_pom:
@@ -259,12 +260,19 @@ def reconcile(key, properties, module, versions):
                 return
         run("git", "push", "--quiet", "--force-with-lease", "origin", f"HEAD:refs/heads/{branch}", cwd=work)
         pulls = gh_json(f"repos/{ORG}/{repo}/pulls?state=open&head={ORG}:{branch}&per_page=100")
+        verification = (
+            "GitHub Actions are paused for this repository. Run `./mvnw -B -ntp verify` "
+            "locally on this PR branch before merging. This version will not publish "
+            "or notify downstream repositories automatically while Actions are disabled.\n"
+            if key in LOCAL_VERIFICATION_TARGETS else
+            "Merge after this repository's CI passes; its release workflow will publish "
+            "and verify the package before notifying downstream projects.\n"
+        )
         body = (
             "Align this project with already published HauntedMC releases. "
             "The release workflow verified each package from a fresh Maven repository before tagging.\n\n"
             + "\n".join(f"- {change}" for change in changes)
-            + "\n\nThis PR also prepares a patch release. Merge after this repository's CI passes; "
-            "its release workflow will publish and verify the package before notifying downstream projects.\n"
+            + "\n\nThis PR also prepares a patch version. " + verification
         )
         if pulls:
             run("gh", "pr", "edit", str(pulls[0]["number"]), "--repo", f"{ORG}/{repo}",

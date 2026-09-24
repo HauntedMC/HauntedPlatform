@@ -86,6 +86,13 @@ class ReleaseAutomationTest(unittest.TestCase):
                 "dataprovider", {"dataprovider": "3.4.4", "palette": "1.2.1"}
             ))
 
+    def test_paused_application_actions_do_not_block_dependency_prs(self):
+        with patch.object(updater, "gh_json", return_value=[]), patch.object(
+            updater, "main_pom", return_value="<revision>5.7.1</revision>"
+        ):
+            self.assertFalse(updater.pending("proxyfeatures", {"proxyfeatures": "5.3.1"}))
+            self.assertFalse(updater.pending("serverfeatures", {"serverfeatures": "5.2.6"}))
+
 
 if __name__ == "__main__":
     unittest.main()

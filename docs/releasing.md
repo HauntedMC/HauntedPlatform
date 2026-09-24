@@ -47,6 +47,10 @@ Platform parent upgrades are proposed to all projects, but the bot starts with T
 
 The reconciler uses the fixed `automation/internal-dependencies` branch in each repository and module-specific branches in Theme. A new release refreshes the open PR with all published versions available at that point. It will not propose an unpublished dependency. A consumer keeps its own patch version and test gate; a critical API update therefore needs one reviewed patch per affected consumer, without an intermediate Platform release or speculative dependency PR.
 
+## Temporary application Actions pause
+
+GitHub Actions are disabled for ProxyFeatures and ServerFeatures. The reconciler still opens their dependency update PRs when an upstream package is published, even if an application's current revision is newer than its last GitHub Release. Reviewers run `./mvnw -B -ntp verify` locally on each PR branch before merging. Merging those PRs does not publish an application package, create a release tag, or notify downstream repositories while Actions remain disabled. When Actions are restored, reinstate the required checks and remove the local-verification exception from the reconciler.
+
 ## GitHub App and package credentials
 
 Create one organization-owned GitHub App, install it on HauntedPlatform, DataProvider, DataRegistry, FeatureFramework, Theme, HauntedObservability, ProxyFeatures, and ServerFeatures, and grant repository **Contents: read/write** and **Pull requests: read/write**. Add the organization Actions variable `HAUNTEDMC_RELEASE_APP_ID` and organization secret `HAUNTEDMC_RELEASE_APP_PRIVATE_KEY` with access to those eight repositories. The release workflows use the App to dispatch the central updater; the updater uses it to push bot branches and open PRs. Keep `HAUNTEDMC_PACKAGES_USERNAME` and `HAUNTEDMC_PACKAGES_TOKEN` as the separate Maven GitHub Packages credentials with read/write package access. The App does not need package publication permission.
