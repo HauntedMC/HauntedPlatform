@@ -4,7 +4,7 @@ HauntedPlatform owns shared external dependencies, Paper/Velocity API and runtim
 
 ## Release contract
 
-1. Prepare a semantic version bump in the producer's PR. For Platform, run `scripts/prepare-release.sh X.Y.Z` in a clean worktree. For the other projects, run `./update_version.sh patch` (or `major`/`minor`); Theme uses `./update_version.sh palette patch` or `adapter patch`. The helpers edit files only. Review and merge the PR after its normal CI passes.
+1. From clean, current `main`, prepare a reviewed version PR with `./tools/release/update-version X.Y.Z --pr` for Platform, `./tools/release/update-version patch --pr` for other projects, or `./tools/release/update-version patch --component palette --pr` (or `adapter`) for Theme. Without `--pr`, the command only prepares a local diff; `--dry-run` changes nothing. The shared release CLI handles the branch, commit, push, and PR. Review and merge after CI passes, except for the paused applications below.
 2. A version change on `main` starts the release workflow. `workflow_dispatch` can retry a failed release. The workflow runs the producer's release profiles and platform acceptance, deploys the reactor with `deployAtEnd`, and resolves each deployed coordinate from an empty Maven repository. Acceptance fixture modules are not deployed.
 3. Only after resolution succeeds does the workflow create the GitHub Release and tag. A partial deploy failure may leave immutable package coordinates; inspect what was published before retrying. Never overwrite a published version. If retry cannot finish the same version, publish a new patch version and document the superseded partial release.
 4. The producer sends `repository_dispatch` to HauntedPlatform with a GitHub App installation token. The reconciler verifies a matching GitHub Release is visible, reads the latest stable releases, and opens or refreshes one bot-owned PR per ready consumer. It waits when an upstream update PR is open or a merged upstream version has not been tagged. PR CI tests the published package. Nothing merges automatically.
@@ -45,11 +45,11 @@ flowchart LR
 
 Platform parent upgrades are proposed to all projects, but the bot starts with Theme palette and DataProvider, then waits for their published updates before preparing dependent projects. A DataProvider API update follows DataRegistry, FeatureFramework, the adapter and Observability, ProxyFeatures, and ServerFeatures. Independent ready branches can advance in parallel. Theme palette and adapter have separate versions and release tags even though they share a repository.
 
-The reconciler uses the fixed `automation/internal-dependencies` branch in each repository and module-specific branches in Theme. A new release refreshes the open PR with all published versions available at that point. It will not propose an unpublished dependency. A consumer keeps its own patch version and test gate; a critical API update therefore needs one reviewed patch per affected consumer, without an intermediate Platform release or speculative dependency PR.
+The reconciler uses the fixed `automation/internal-dependencies` branch in each repository and module-specific branches in Theme. A new release refreshes the open PR with all published versions available at that point; a daily scan catches missed notifications. It will not propose an unpublished dependency. A consumer keeps its own patch version and test gate; a critical API update therefore needs one reviewed patch per affected consumer, without an intermediate Platform release or speculative dependency PR.
 
 ## Temporary application Actions pause
 
-GitHub Actions are disabled for ProxyFeatures and ServerFeatures. The reconciler still opens their dependency update PRs when an upstream package is published, even if an application's current revision is newer than its last GitHub Release. Reviewers run `./mvnw -B -ntp verify` locally on each PR branch before merging. Merging those PRs does not publish an application package, create a release tag, or notify downstream repositories while Actions remain disabled. When Actions are restored, reinstate the required checks and remove the local-verification exception from the reconciler.
+GitHub Actions are disabled for ProxyFeatures and ServerFeatures. The reconciler still opens their dependency update PRs when an upstream package is published, even if an application's current revision is newer than its last GitHub Release. Bot updates open as draft PRs; reviewers run `gh haunted-release verify-pr NUMBER` locally to verify the exact head commit and mark the PR ready. Manually prepared version PRs run Maven before opening. Merging those PRs does not publish an application package, create a release tag, or notify downstream repositories while Actions remain disabled. When Actions are restored, reinstate the required checks and remove the local-verification exception from the reconciler.
 
 ## GitHub App and package credentials
 
@@ -57,7 +57,7 @@ Create one organization-owned GitHub App, install it on HauntedPlatform, DataPro
 
 Protect `main` in every repository with required PR checks and review. Allow the App to push only bot branches, not bypass branch protection. Because release workflows use `contents: write` for the post-publication tag, the repository's Actions policy must allow tag creation. If App setup or dispatch fails after a package and tag are complete, rerun HauntedPlatform's **Reconcile internal dependency PRs** workflow with the released producer and version; it is idempotent. If a publication fails before the tag, retry the producer workflow after diagnosing the failure.
 
-## 2.0.0 migration order
+## Historical 2.0.0 migration order
 
 1. Install the GitHub App and expose its variable and private-key secret to all eight repositories before merging a release workflow. Merge and publish DataProvider 3.4.4 and DataRegistry 1.18.5 BOM additions while they still use the published Platform 1.6.10 parent. Their BOMs manage only their own modules.
 2. Merge the Theme split and publish `palette-v1.2.1` before `adapter-v1.2.1`; the adapter depends on the published palette. Theme's CI can build the two-module reactor before either release.

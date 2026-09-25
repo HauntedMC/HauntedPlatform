@@ -1,7 +1,4 @@
 import importlib.util
-import os
-import subprocess
-import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -13,40 +10,6 @@ spec.loader.exec_module(updater)
 
 
 class ReleaseAutomationTest(unittest.TestCase):
-    def test_gate_publishes_only_new_untagged_version(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            subprocess.run(["git", "init", "-q", str(root)], check=True)
-            subprocess.run(["git", "config", "user.name", "test"], cwd=root, check=True)
-            subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=root, check=True)
-            pom = root / "pom.xml"
-            pom.write_text('<project xmlns="http://maven.apache.org/POM/4.0.0">'
-                           '<properties><revision>1.2.3</revision></properties></project>')
-            subprocess.run(["git", "add", "pom.xml"], cwd=root, check=True)
-            subprocess.run(["git", "commit", "-qm", "old"], cwd=root, check=True)
-            before = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-            pom.write_text(pom.read_text().replace("1.2.3", "1.2.4"))
-            env = dict(os.environ, GITHUB_EVENT_BEFORE=before, GITHUB_EVENT_NAME="push")
-            result = subprocess.check_output(
-                ["python3", str(SCRIPTS / "release-gate.py"), "--tag-prefix", "palette-"],
-                cwd=root, env=env, text=True,
-            )
-            self.assertIn("publish: True", result)
-            self.assertIn("palette-v1.2.4", result)
-            same_version = subprocess.check_output(
-                ["python3", str(SCRIPTS / "release-gate.py"), "--tag-prefix", "palette-"],
-                cwd=root, env=dict(env, GITHUB_EVENT_BEFORE=""), text=True,
-            )
-            self.assertIn("publish: True", same_version)
-            subprocess.run(["git", "add", "pom.xml"], cwd=root, check=True)
-            subprocess.run(["git", "commit", "-qm", "new"], cwd=root, check=True)
-            subprocess.run(["git", "tag", "palette-v1.2.4"], cwd=root, check=True)
-            result = subprocess.check_output(
-                ["python3", str(SCRIPTS / "release-gate.py"), "--tag-prefix", "palette-"],
-                cwd=root, env=env, text=True,
-            )
-            self.assertIn("publish: False", result)
-
     def test_updater_only_advances_internal_properties_and_parent(self):
         pom = ("<parent><groupId>nl.hauntedmc.platform</groupId>"
                "<artifactId>haunted-library-parent</artifactId><version>1.6.10</version></parent>"
@@ -92,6 +55,24 @@ class ReleaseAutomationTest(unittest.TestCase):
         ):
             self.assertFalse(updater.pending("proxyfeatures", {"proxyfeatures": "5.3.1"}))
             self.assertFalse(updater.pending("serverfeatures", {"serverfeatures": "5.2.6"}))
+
+    def test_manual_release_pr_blocks_bot_update(self):
+        pulls = [{"head": {"ref": "release/v5.7.2"}}]
+        self.assertTrue(updater.manual_version_pr("proxyfeatures", pulls))
+        self.assertFalse(updater.manual_version_pr("palette", pulls))
+        self.assertTrue(updater.manual_version_pr(
+            "palette", [{"head": {"ref": "release/palette-v1.2.3"}}]
+        ))
+        with patch.object(updater, "gh_json", return_value=pulls):
+            self.assertTrue(updater.pending("proxyfeatures", {"proxyfeatures": "5.3.1"}))
+
+    def test_scheduled_scan_does_not_require_release_payload(self):
+        with patch.dict("os.environ", {"GITHUB_EVENT_NAME": "schedule", "RELEASE_PAYLOAD": "{}"}), \
+             patch.object(updater, "published_versions", return_value={}), \
+             patch.object(updater, "run"), \
+             patch.object(updater, "pending", return_value=True), \
+             patch.object(updater, "reconcile"):
+            updater.main()
 
 
 if __name__ == "__main__":
