@@ -11,7 +11,7 @@ HauntedPlatform is HauntedMC's shared **external dependency and build policy**. 
 | `haunted-minecraft-bom` | Paper, Velocity, Brigadier, PlaceholderAPI, ViaVersion, and other Minecraft integration APIs |
 | `haunted-build-rules` | Shared Checkstyle configuration |
 
-Internal versions belong to the consuming repository. DataProvider, DataRegistry, FeatureFramework, and HauntedObservability publish BOMs for **their own** modules. Theme publishes palette and FeatureFramework adapter separately. ProxyFeatures and ServerFeatures import those BOMs and select each released internal version in their root POMs. Dungeons, VelocityHotReloader, PaperHotReloader, AIlex, and CraftGPT inherit the application parent for build and Minecraft dependency policy without adding runtime HauntedMC library dependencies. This removes the former `haunted-platform-bom` release cycle; version 1.6.10 remains available for older consumers, but 2.0.0 and later do not publish that artifact.
+Internal versions belong to the consuming repository. DataProvider, DataRegistry, FeatureFramework, and HauntedObservability publish BOMs for **their own** modules. Theme publishes palette and FeatureFramework adapter separately. ProxyFeatures and ServerFeatures import those BOMs and select each released internal version in their root POMs. Dungeons, VelocityHotReloader, PaperHotReloader, AIlex, CraftGPT, and WebApp inherit the application parent for build policy without adding runtime HauntedMC library dependencies. This removes the former `haunted-platform-bom` release cycle; version 1.6.10 remains available for older consumers, but 2.0.0 and later do not publish that artifact.
 
 ## Maven consumption
 
@@ -44,7 +44,7 @@ A consuming project's root POM chooses its internal versions explicitly:
 
 The version examples above become usable only after their corresponding releases have been published. Do not point a PR at an unpublished package. Each root property is a compatibility decision for that consumer; updating one does not require another Platform release.
 
-Maven Dependabot runs in HauntedPlatform only. Downstream repositories retain GitHub Actions Dependabot updates; their Maven updates come from a reviewed Platform release or the internal release reconciler. Consumer CI rejects literal external dependency/plugin versions and local overrides of Platform-owned version properties.
+Maven Dependabot runs in HauntedPlatform only. Most downstream repositories retain GitHub Actions Dependabot updates; their Maven parent updates come from a reviewed Platform release or the internal release reconciler. WebApp manages its Spring Boot application BOM separately. WebApp, ProxyFeatures, and ServerFeatures verify reviewed updates locally while Actions are disabled. Enabled consumer CI rejects literal external dependency/plugin versions and local overrides of Platform-owned version properties.
 
 ## Releasing and downstream updates
 
