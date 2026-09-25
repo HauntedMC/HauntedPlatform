@@ -27,6 +27,9 @@ PROJECTS = {
     "observability": ("HauntedObservability", "pom.xml", "v"),
     "proxyfeatures": ("ProxyFeatures", "pom.xml", "v"),
     "serverfeatures": ("ServerFeatures", "pom.xml", "v"),
+    "dungeons": ("Dungeons", "pom.xml", "v"),
+    "velocityhotreloader": ("VelocityHotReloader", "pom.xml", "v"),
+    "paperhotreloader": ("PaperHotReloader", "pom.xml", "v"),
 }
 TARGETS = [
     ("palette", (), {}, "palette"),
@@ -65,6 +68,9 @@ TARGETS = [
         "haunted.observability.version": "observability",
         "haunted.proxyfeatures.contracts.version": "proxyfeatures",
     }, None),
+    ("dungeons", (), {}, None),
+    ("velocityhotreloader", (), {}, None),
+    ("paperhotreloader", (), {}, None),
 ]
 
 

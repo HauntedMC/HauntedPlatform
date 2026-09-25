@@ -1,3 +1,6 @@
 .idea/
 target/
 .flattened-pom.xml
+
+# Python test cache
+__pycache__/
