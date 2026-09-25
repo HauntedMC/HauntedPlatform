@@ -221,6 +221,26 @@ def dependency_versions_match(content, properties, versions):
     return True
 
 
+def validate_graph():
+    """Fail visibly when the configured graph no longer matches consumer POMs."""
+    seen = {"platform"}
+    for key, upstream, properties, _ in TARGETS:
+        if key not in PROJECTS or any(dependency not in seen for dependency in upstream):
+            raise ValueError(f"Invalid release-graph order at {key}")
+        seen.add(key)
+        pom = main_pom(key)
+        current_revision(pom)
+        if not re.search(
+            r"<parent>\s*<groupId>nl\.hauntedmc\.platform</groupId>\s*"
+            r"<artifactId>haunted-(?:library|application)-parent</artifactId>", pom
+        ):
+            raise ValueError(f"{key}: missing HauntedPlatform parent")
+        for property_name in properties:
+            expression = rf"<{re.escape(property_name)}>[^<]+</{re.escape(property_name)}>"
+            if len(re.findall(expression, pom)) != 1:
+                raise ValueError(f"{key}: expected one {property_name} in its POM")
+
+
 def reconcile(key, properties, module, versions):
     repo, pom_path, _ = PROJECTS[key]
     if manual_version_pr(key, open_pulls(key)):
@@ -230,13 +250,6 @@ def reconcile(key, properties, module, versions):
     own_release = versions.get(key)
     if key not in LOCAL_VERIFICATION_TARGETS and own_release and semver(current_revision(base_pom)) > semver(own_release):
         print(f"{repo}/{key}: waiting for its merged release to publish", flush=True)
-        return
-    if "nl.hauntedmc.platform" not in base_pom:
-        print(f"{repo}/{key}: waiting for parent migration PR", flush=True)
-        return
-    missing = [name for name in properties if f"<{name}>" not in base_pom]
-    if missing:
-        print(f"{repo}/{key}: waiting for internal-version migration PR ({', '.join(missing)})", flush=True)
         return
     desired = base_pom
     changes = []
@@ -341,6 +354,7 @@ def main():
             raise SystemExit(f"Release {payload['producer']} {payload['version']} is not visible yet")
         time.sleep(5)
     run("gh", "auth", "setup-git")
+    validate_graph()
     for key, upstream, properties, module in TARGETS:
         if any(pending(dep, versions) for dep in upstream):
             print(f"{PROJECTS[key][0]}/{key}: waiting for upstream reviewed PR or publication", flush=True)

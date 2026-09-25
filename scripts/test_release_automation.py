@@ -70,9 +70,33 @@ class ReleaseAutomationTest(unittest.TestCase):
         with patch.dict("os.environ", {"GITHUB_EVENT_NAME": "schedule", "RELEASE_PAYLOAD": "{}"}), \
              patch.object(updater, "published_versions", return_value={}), \
              patch.object(updater, "run"), \
+             patch.object(updater, "validate_graph"), \
              patch.object(updater, "pending", return_value=True), \
              patch.object(updater, "reconcile"):
             updater.main()
+
+    def test_graph_detects_a_missing_consumer_property(self):
+        pom = ("<revision>1.2.3</revision><parent>"
+               "<groupId>nl.hauntedmc.platform</groupId>"
+               "<artifactId>haunted-library-parent</artifactId><version>2.0.0</version>"
+               "</parent>")
+        with patch.object(updater, "main_pom", return_value=pom):
+            with self.assertRaisesRegex(ValueError, "haunted.theme.version"):
+                updater.validate_graph()
+
+    def test_graph_matches_local_checkout_when_all_projects_are_present(self):
+        projects_root = SCRIPTS.parents[1]
+        folders = {"Theme": "HauntedMCTheme"}
+        required = {
+            key: projects_root / folders.get(repo, repo) / pom
+            for key, (repo, pom, _) in updater.PROJECTS.items()
+            if key != "platform"
+        }
+        if not all(path.is_file() for path in required.values()):
+            self.skipTest("Sibling project checkouts are unavailable")
+        with patch.object(updater, "main_pom",
+                          side_effect=lambda key: required[key].read_text()):
+            updater.validate_graph()
 
     def test_existing_aligned_pr_is_not_reprepared_or_pushed(self):
         base_pom = (
