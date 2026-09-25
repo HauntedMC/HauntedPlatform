@@ -30,10 +30,12 @@ class ReleaseAutomationTest(unittest.TestCase):
             for dependency in upstream:
                 self.assertLess(order[dependency], order[target])
 
-    def test_dungeons_and_reloaders_receive_independent_platform_updates(self):
+    def test_independent_plugins_receive_platform_updates(self):
         targets = {name: (upstream, properties, module)
                    for name, upstream, properties, module in updater.TARGETS}
         for key, repository in (("dungeons", "Dungeons"),
+                                ("ailex", "AIlex"),
+                                ("craftgpt", "CraftGPT"),
                                 ("velocityhotreloader", "VelocityHotReloader"),
                                 ("paperhotreloader", "PaperHotReloader")):
             self.assertEqual(updater.PROJECTS[key], (repository, "pom.xml", "v"))

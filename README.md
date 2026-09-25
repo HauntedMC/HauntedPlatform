@@ -11,7 +11,7 @@ HauntedPlatform is HauntedMC's shared **external dependency and build policy**. 
 | `haunted-minecraft-bom` | Paper, Velocity, Brigadier, PlaceholderAPI, ViaVersion, and other Minecraft integration APIs |
 | `haunted-build-rules` | Shared Checkstyle configuration |
 
-Internal versions belong to the consuming repository. DataProvider, DataRegistry, FeatureFramework, and HauntedObservability publish BOMs for **their own** modules. Theme publishes palette and FeatureFramework adapter separately. ProxyFeatures and ServerFeatures import those BOMs and select each released internal version in their root POMs. Dungeons, VelocityHotReloader, and PaperHotReloader inherit the application parent for build and Minecraft dependency policy without adding runtime HauntedMC library dependencies. This removes the former `haunted-platform-bom` release cycle; version 1.6.10 remains available for older consumers, but 2.0.0 and later do not publish that artifact.
+Internal versions belong to the consuming repository. DataProvider, DataRegistry, FeatureFramework, and HauntedObservability publish BOMs for **their own** modules. Theme publishes palette and FeatureFramework adapter separately. ProxyFeatures and ServerFeatures import those BOMs and select each released internal version in their root POMs. Dungeons, VelocityHotReloader, PaperHotReloader, AIlex, and CraftGPT inherit the application parent for build and Minecraft dependency policy without adding runtime HauntedMC library dependencies. This removes the former `haunted-platform-bom` release cycle; version 1.6.10 remains available for older consumers, but 2.0.0 and later do not publish that artifact.
 
 ## Maven consumption
 
