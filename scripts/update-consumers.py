@@ -28,6 +28,8 @@ PROJECTS = {
     "proxyfeatures": ("ProxyFeatures", "pom.xml", "v"),
     "serverfeatures": ("ServerFeatures", "pom.xml", "v"),
     "dungeons": ("Dungeons", "pom.xml", "v"),
+    "ailex": ("AIlex", "pom.xml", "v"),
+    "craftgpt": ("CraftGPT", "pom.xml", "v"),
     "velocityhotreloader": ("VelocityHotReloader", "pom.xml", "v"),
     "paperhotreloader": ("PaperHotReloader", "pom.xml", "v"),
 }
@@ -69,6 +71,8 @@ TARGETS = [
         "haunted.proxyfeatures.contracts.version": "proxyfeatures",
     }, None),
     ("dungeons", (), {}, None),
+    ("ailex", (), {}, None),
+    ("craftgpt", (), {}, None),
     ("velocityhotreloader", (), {}, None),
     ("paperhotreloader", (), {}, None),
 ]
