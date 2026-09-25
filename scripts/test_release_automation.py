@@ -70,9 +70,71 @@ class ReleaseAutomationTest(unittest.TestCase):
         with patch.dict("os.environ", {"GITHUB_EVENT_NAME": "schedule", "RELEASE_PAYLOAD": "{}"}), \
              patch.object(updater, "published_versions", return_value={}), \
              patch.object(updater, "run"), \
+             patch.object(updater, "validate_graph"), \
              patch.object(updater, "pending", return_value=True), \
              patch.object(updater, "reconcile"):
             updater.main()
+
+    def test_graph_detects_a_missing_consumer_property(self):
+        pom = ("<revision>1.2.3</revision><parent>"
+               "<groupId>nl.hauntedmc.platform</groupId>"
+               "<artifactId>haunted-library-parent</artifactId><version>2.0.0</version>"
+               "</parent>")
+        with patch.object(updater, "main_pom", return_value=pom):
+            with self.assertRaisesRegex(ValueError, "haunted.theme.version"):
+                updater.validate_graph()
+
+    def test_graph_matches_local_checkout_when_all_projects_are_present(self):
+        projects_root = SCRIPTS.parents[1]
+        folders = {"Theme": "HauntedMCTheme"}
+        required = {
+            key: projects_root / folders.get(repo, repo) / pom
+            for key, (repo, pom, _) in updater.PROJECTS.items()
+            if key != "platform"
+        }
+        if not all(path.is_file() for path in required.values()):
+            self.skipTest("Sibling project checkouts are unavailable")
+        with patch.object(updater, "main_pom",
+                          side_effect=lambda key: required[key].read_text()):
+            updater.validate_graph()
+
+    def test_existing_aligned_pr_is_not_reprepared_or_pushed(self):
+        base_pom = (
+            "<revision>3.4.5</revision><parent>"
+            "<groupId>nl.hauntedmc.platform</groupId>"
+            "<artifactId>haunted-library-parent</artifactId><version>1.6.8</version>"
+            "</parent><haunted.theme.version>1.2.1</haunted.theme.version>"
+        )
+        remote_pom = base_pom.replace("3.4.5", "3.4.6").replace(
+            "1.6.8", "2.0.0").replace("1.2.1", "1.2.2")
+        calls = []
+
+        def fake_run(*args, **kwargs):
+            calls.append(args)
+            if args[:2] == ("git", "rev-parse"):
+                return "base-sha\n"
+            if args[:2] == ("git", "merge-base"):
+                return "base-sha\n"
+            if args[:2] == ("git", "show"):
+                return remote_pom
+            return ""
+
+        with patch.object(updater, "main_pom", return_value=base_pom), \
+             patch.object(updater, "open_pulls", return_value=[{
+                 "head": {"ref": "automation/internal-dependencies"}
+             }]), patch.object(updater, "run", side_effect=fake_run):
+            updater.reconcile("dataprovider",
+                              {"haunted.theme.version": "palette"}, None,
+                              {"platform": "2.0.0", "palette": "1.2.2",
+                               "dataprovider": "3.4.5"})
+        self.assertNotIn(("gh", "haunted-release", "publish-pr"), calls)
+        self.assertFalse(any(args and args[0] == "./tools/release/prepare-version.sh"
+                             for args in calls))
+
+    def test_paginated_github_lists(self):
+        with patch.object(updater, "gh_json", side_effect=[[None] * 100, ["last"]]) as api:
+            self.assertEqual(len(updater.gh_json_pages("repos/HauntedMC/Theme/releases")), 101)
+        self.assertIn("page=2", api.call_args_list[-1].args[0])
 
 
 if __name__ == "__main__":

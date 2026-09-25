@@ -10,9 +10,9 @@ on:
         default: ./mvnw -U -B -ntp clean verify
     secrets:
       PACKAGES_USER:
-        required: true
+        required: false
       PACKAGES_TOKEN:
-        required: true
+        required: false
       HAUNTEDMC_PACKAGES_USERNAME:
         required: false
       HAUNTEDMC_PACKAGES_TOKEN:
@@ -28,23 +28,24 @@ permissions:
 
 jobs:
   verify:
+    name: Maven verify
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      PACKAGES_USER: ${{ secrets.PACKAGES_USER || secrets.HAUNTEDMC_PACKAGES_USERNAME }}
-      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.HAUNTEDMC_PACKAGES_TOKEN }}
+      PACKAGES_USER: ${{ secrets.PACKAGES_USER || secrets.HAUNTEDMC_PACKAGES_USERNAME || github.actor }}
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.HAUNTEDMC_PACKAGES_TOKEN || github.token }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Test release gate and dependency reconciliation
-        if: github.repository == 'HauntedMC/HauntedPlatform'
-        run: python3 -m unittest discover -s scripts -p 'test_*.py'
       - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: '25'
           cache: maven
+          server-id: github
+          server-username: PACKAGES_USER
+          server-password: PACKAGES_TOKEN
       - name: Validate GitHub Packages credentials
         shell: bash
         run: |
@@ -63,8 +64,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      PACKAGES_USER: ${{ secrets.PACKAGES_USER || secrets.HAUNTEDMC_PACKAGES_USERNAME }}
-      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.HAUNTEDMC_PACKAGES_TOKEN }}
+      PACKAGES_USER: ${{ secrets.PACKAGES_USER || secrets.HAUNTEDMC_PACKAGES_USERNAME || github.actor }}
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.HAUNTEDMC_PACKAGES_TOKEN || github.token }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -74,6 +75,9 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
+          server-id: github
+          server-username: PACKAGES_USER
+          server-password: PACKAGES_TOKEN
       - name: Validate GitHub Packages credentials
         shell: bash
         run: |
@@ -91,3 +95,34 @@ jobs:
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml clean verify
 
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f verification/application-parent-consumer/pom.xml dependency:tree help:effective-pom
+
+  static:
+    if: github.repository == 'HauntedMC/HauntedPlatform'
+    name: Static checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - run: git diff --check HEAD^ HEAD
+      - run: python3 -m unittest discover -s scripts -p 'test_*.py'
+
+  ci-required:
+    if: ${{ always() && github.repository == 'HauntedMC/HauntedPlatform' }}
+    name: ci-required
+    needs: [verify, platform-consumer-contracts, static]
+    runs-on: ubuntu-24.04
+    env:
+      CHECK_RESULTS: ${{ toJSON(needs) }}
+    steps:
+      - name: Require every validation job
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          results = {name: job['result'] for name, job in json.loads(os.environ['CHECK_RESULTS']).items()}
+          failed = {name: result for name, result in results.items() if result != 'success'}
+          if failed:
+              raise SystemExit(f'Validation did not pass: {failed}')
+          PY
