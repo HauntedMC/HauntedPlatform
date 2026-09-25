@@ -300,8 +300,9 @@ def reconcile(key, properties, module, versions):
         run("git", "push", "--quiet", "--force-with-lease", "origin", f"HEAD:refs/heads/{branch}", cwd=work)
         pulls = gh_json(f"repos/{ORG}/{repo}/pulls?state=open&head={ORG}:{branch}&per_page=100")
         if pulls:
-            run("gh", "pr", "edit", str(pulls[0]["number"]), "--repo", f"{ORG}/{repo}",
-                "--body", body, cwd=work)
+            run("gh", "api", "-X", "PATCH",
+                f"repos/{ORG}/{repo}/pulls/{pulls[0]['number']}",
+                "-f", f"body={body}", cwd=work)
         else:
             run("gh", "pr", "create", "--repo", f"{ORG}/{repo}", "--base", "main",
                 "--head", branch, "--title", "chore: align published HauntedMC dependencies",
