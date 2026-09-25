@@ -1,7 +1,7 @@
 [project]
 name = "HauntedPlatform"
 repository = "HauntedMC/HauntedPlatform"
-tool_version = "1.0.0"
+tool_version = "1.0.1"
 mode = "exact"
 prepare = "tools/release/prepare-version.sh"
 verify = ["mvn", "-B", "-ntp", "verify"]
