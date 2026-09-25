@@ -13,6 +13,8 @@ on:
         description: Verified release version
         required: true
         type: string
+  schedule:
+    - cron: '17 4 * * *'
 
 permissions:
   contents: read
@@ -29,6 +31,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Install pinned release CLI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh extension install HauntedMC/gh-haunted-release --pin 86bed2fdf7438ea3d6cc3b76f5c7cc36a58a46bf
       - uses: actions/create-github-app-token@v3
         id: app
         with:

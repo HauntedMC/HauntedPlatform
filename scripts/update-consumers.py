@@ -115,6 +115,16 @@ def branch_for(key):
     return f"automation/internal-{key}" if key in ("palette", "adapter") else BRANCH
 
 
+def open_pulls(key):
+    repo, _, _ = PROJECTS[key]
+    return gh_json(f"repos/{ORG}/{repo}/pulls?state=open&per_page=100")
+
+
+def manual_version_pr(key, pulls):
+    prefix = f"release/{key}-" if key in ("palette", "adapter") else "release/v"
+    return any(pr["head"]["ref"].startswith(prefix) for pr in pulls)
+
+
 def main_pom(key):
     repo, path, _ = PROJECTS[key]
     content = gh_json(f"repos/{ORG}/{repo}/contents/{path}?ref=main")
@@ -124,8 +134,8 @@ def main_pom(key):
 def pending(key, versions):
     repo, _, _ = PROJECTS[key]
     name = branch_for(key)
-    pulls = gh_json(f"repos/{ORG}/{repo}/pulls?state=open&per_page=100")
-    if any(pr["head"]["ref"] == name for pr in pulls):
+    pulls = open_pulls(key)
+    if any(pr["head"]["ref"] == name for pr in pulls) or manual_version_pr(key, pulls):
         return True
     pom = main_pom(key)
     latest = versions.get(key)
@@ -180,6 +190,9 @@ def replace_parent(content, desired):
 
 def reconcile(key, properties, module, versions):
     repo, pom_path, _ = PROJECTS[key]
+    if manual_version_pr(key, open_pulls(key)):
+        print(f"{repo}/{key}: waiting for a human version PR", flush=True)
+        return
     base_pom = main_pom(key)
     own_release = versions.get(key)
     if key not in LOCAL_VERIFICATION_TARGETS and own_release and semver(current_revision(base_pom)) > semver(own_release):
@@ -220,10 +233,11 @@ def reconcile(key, properties, module, versions):
         run("git", "clone", "--quiet", f"https://github.com/{ORG}/{repo}.git", str(work))
         run("git", "config", "user.name", "hauntedmc-release-bot", cwd=work)
         run("git", "config", "user.email", "release-bot@users.noreply.github.com", cwd=work)
+        prepare = "./tools/release/prepare-version.sh" if (work / "tools/release/prepare-version.sh").is_file() else "./update_version.sh"
         if module:
-            run("./update_version.sh", module, "patch", cwd=work)
+            run(prepare, module, "patch", cwd=work)
         else:
-            run("./update_version.sh", "patch", cwd=work)
+            run(prepare, "patch", cwd=work)
         pom = work / pom_path
         original = pom.read_text()
         updated = original
@@ -246,6 +260,31 @@ def reconcile(key, properties, module, versions):
         run("git", "add", "-A", cwd=work)
         run("git", "commit", "-m", "chore: align published HauntedMC dependencies", cwd=work)
         branch = branch_for(key)
+        verification = (
+            "GitHub Actions are paused for this repository. This PR is a draft until "
+            "`gh haunted-release verify-pr NUMBER` passes locally at the current head. "
+            "Merging will not publish or notify downstream repositories while Actions are disabled.\n"
+            if key in LOCAL_VERIFICATION_TARGETS else
+            "Merge after this repository's CI passes; its release workflow will publish "
+            "and verify the package before notifying downstream projects.\n"
+        )
+        body = (
+            "Align this project with already published HauntedMC releases. "
+            "The release workflow verified each package from a fresh Maven repository before tagging.\n\n"
+            + "\n".join(f"- {change}" for change in changes)
+            + "\n\nThis PR also prepares a patch version. " + verification
+        )
+        if (work / "tools/release/project.toml").is_file():
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".md") as body_file:
+                body_file.write(body)
+                body_file.flush()
+                run(
+                    "gh", "haunted-release", "publish-pr", "--branch", branch,
+                    "--title", "chore: align published HauntedMC dependencies",
+                    "--body-file", body_file.name, cwd=work,
+                )
+            print(f"{repo}/{key}: opened or refreshed PR for {', '.join(changes)}", flush=True)
+            return
         remote = subprocess.run(
             ["git", "fetch", "--quiet", "origin", f"refs/heads/{branch}:refs/remotes/origin/{branch}"],
             cwd=work, capture_output=True, text=True,
@@ -260,20 +299,6 @@ def reconcile(key, properties, module, versions):
                 return
         run("git", "push", "--quiet", "--force-with-lease", "origin", f"HEAD:refs/heads/{branch}", cwd=work)
         pulls = gh_json(f"repos/{ORG}/{repo}/pulls?state=open&head={ORG}:{branch}&per_page=100")
-        verification = (
-            "GitHub Actions are paused for this repository. Run `./mvnw -B -ntp verify` "
-            "locally on this PR branch before merging. This version will not publish "
-            "or notify downstream repositories automatically while Actions are disabled.\n"
-            if key in LOCAL_VERIFICATION_TARGETS else
-            "Merge after this repository's CI passes; its release workflow will publish "
-            "and verify the package before notifying downstream projects.\n"
-        )
-        body = (
-            "Align this project with already published HauntedMC releases. "
-            "The release workflow verified each package from a fresh Maven repository before tagging.\n\n"
-            + "\n".join(f"- {change}" for change in changes)
-            + "\n\nThis PR also prepares a patch version. " + verification
-        )
         if pulls:
             run("gh", "pr", "edit", str(pulls[0]["number"]), "--repo", f"{ORG}/{repo}",
                 "--body", body, cwd=work)
@@ -289,11 +314,12 @@ def main():
     allowed = {name for name, _, _ in PROJECTS.values()} | {
         "hauntedmc-theme-palette", "hauntedmc-theme-featureframework"
     }
-    if payload.get("producer") not in allowed or not re.fullmatch(
+    scheduled = os.environ.get("GITHUB_EVENT_NAME") == "schedule"
+    if not scheduled and (payload.get("producer") not in allowed or not re.fullmatch(
         r"\d+\.\d+\.\d+", str(payload.get("version", ""))
-    ):
+    )):
         raise SystemExit("Invalid or missing release notification")
-    producer = {
+    producer = None if scheduled else {
         "HauntedPlatform": "platform",
         "HauntedObservability": "observability",
         "hauntedmc-theme-palette": "palette",
@@ -301,7 +327,7 @@ def main():
     }.get(payload["producer"], payload["producer"].lower())
     for attempt in range(6):
         versions = published_versions()
-        if versions.get(producer) and semver(versions[producer]) >= semver(payload["version"]):
+        if scheduled or (versions.get(producer) and semver(versions[producer]) >= semver(payload["version"])):
             break
         if attempt == 5:
             raise SystemExit(f"Release {payload['producer']} {payload['version']} is not visible yet")

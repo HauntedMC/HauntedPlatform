@@ -1,0 +1,12 @@
+[project]
+name = "HauntedPlatform"
+repository = "HauntedMC/HauntedPlatform"
+tool_version = "1.0.0"
+mode = "exact"
+prepare = "tools/release/prepare-version.sh"
+verify = ["mvn", "-B", "-ntp", "verify"]
+verify_before_pr = false
+
+[components.default]
+pom = "pom.xml"
+tag_prefix = "v"
