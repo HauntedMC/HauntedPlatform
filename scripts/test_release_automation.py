@@ -30,6 +30,22 @@ class ReleaseAutomationTest(unittest.TestCase):
             for dependency in upstream:
                 self.assertLess(order[dependency], order[target])
 
+    def test_dungeons_and_reloaders_receive_independent_platform_updates(self):
+        targets = {name: (upstream, properties, module)
+                   for name, upstream, properties, module in updater.TARGETS}
+        for key, repository in (("dungeons", "Dungeons"),
+                                ("velocityhotreloader", "VelocityHotReloader"),
+                                ("paperhotreloader", "PaperHotReloader")):
+            self.assertEqual(updater.PROJECTS[key], (repository, "pom.xml", "v"))
+            self.assertEqual(targets[key], ((), {}, None))
+
+        application_pom = ("<parent><groupId>nl.hauntedmc.platform</groupId>"
+                           "<artifactId>haunted-application-parent</artifactId>"
+                           "<version>2.0.0</version></parent>")
+        updated, changed = updater.replace_parent(application_pom, "2.0.1")
+        self.assertTrue(changed)
+        self.assertIn("<version>2.0.1</version>", updated)
+
     def test_pending_upstream_blocks_downstream_pr(self):
         with patch.object(updater, "gh_json", return_value=[{
             "head": {"ref": "automation/internal-dependencies"}
