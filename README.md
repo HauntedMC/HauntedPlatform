@@ -50,4 +50,4 @@ Maven Dependabot runs in HauntedPlatform only. Downstream repositories retain Gi
 
 A reviewed version bump merged into `main` triggers the repository's release workflow. It runs the full owner-specific quality gate, deploys with `deployAtEnd`, resolves every published artifact from a fresh Maven cache, and only then creates the immutable release tag. A GitHub App dispatches a reconciliation workflow here, which opens or refreshes reviewed downstream PRs in dependency order. Each consumer's CI and release workflow remain its own gate. A failed publication leaves no new tag; rerun the release workflow after fixing the failure. Existing tags are never moved.
 
-See [the release and rollout guide](docs/releasing.md) for the graph, GitHub App setup, bootstrap order, and recovery procedure.
+See [the release and rollout guide](docs/releasing.md) for the graph, GitHub App setup, bootstrap order, and recovery procedure. Contributions are welcome under [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md); report vulnerabilities privately through [SECURITY.md](SECURITY.md). The project is licensed under [AGPL-3.0](LICENSE).

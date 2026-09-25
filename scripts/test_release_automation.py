@@ -74,6 +74,44 @@ class ReleaseAutomationTest(unittest.TestCase):
              patch.object(updater, "reconcile"):
             updater.main()
 
+    def test_existing_aligned_pr_is_not_reprepared_or_pushed(self):
+        base_pom = (
+            "<revision>3.4.5</revision><parent>"
+            "<groupId>nl.hauntedmc.platform</groupId>"
+            "<artifactId>haunted-library-parent</artifactId><version>1.6.8</version>"
+            "</parent><haunted.theme.version>1.2.1</haunted.theme.version>"
+        )
+        remote_pom = base_pom.replace("3.4.5", "3.4.6").replace(
+            "1.6.8", "2.0.0").replace("1.2.1", "1.2.2")
+        calls = []
+
+        def fake_run(*args, **kwargs):
+            calls.append(args)
+            if args[:2] == ("git", "rev-parse"):
+                return "base-sha\n"
+            if args[:2] == ("git", "merge-base"):
+                return "base-sha\n"
+            if args[:2] == ("git", "show"):
+                return remote_pom
+            return ""
+
+        with patch.object(updater, "main_pom", return_value=base_pom), \
+             patch.object(updater, "open_pulls", return_value=[{
+                 "head": {"ref": "automation/internal-dependencies"}
+             }]), patch.object(updater, "run", side_effect=fake_run):
+            updater.reconcile("dataprovider",
+                              {"haunted.theme.version": "palette"}, None,
+                              {"platform": "2.0.0", "palette": "1.2.2",
+                               "dataprovider": "3.4.5"})
+        self.assertNotIn(("gh", "haunted-release", "publish-pr"), calls)
+        self.assertFalse(any(args and args[0] == "./tools/release/prepare-version.sh"
+                             for args in calls))
+
+    def test_paginated_github_lists(self):
+        with patch.object(updater, "gh_json", side_effect=[[None] * 100, ["last"]]) as api:
+            self.assertEqual(len(updater.gh_json_pages("repos/HauntedMC/Theme/releases")), 101)
+        self.assertIn("page=2", api.call_args_list[-1].args[0])
+
 
 if __name__ == "__main__":
     unittest.main()

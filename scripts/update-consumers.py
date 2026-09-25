@@ -79,6 +79,18 @@ def gh_json(path):
     return json.loads(run("gh", "api", path))
 
 
+def gh_json_pages(path):
+    items = []
+    page = 1
+    while True:
+        separator = "&" if "?" in path else "?"
+        batch = gh_json(f"{path}{separator}per_page=100&page={page}")
+        items.extend(batch)
+        if len(batch) < 100:
+            return items
+        page += 1
+
+
 def semver(value):
     match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", value)
     if not match:
@@ -98,7 +110,7 @@ def published_versions():
     by_repo = {}
     for repo, _, _ in PROJECTS.values():
         if repo not in by_repo:
-            by_repo[repo] = gh_json(f"repos/{ORG}/{repo}/releases?per_page=100")
+            by_repo[repo] = gh_json_pages(f"repos/{ORG}/{repo}/releases")
     for key, (repo, _, prefix) in PROJECTS.items():
         versions = [
             release["tag_name"][len(prefix):]
@@ -117,7 +129,7 @@ def branch_for(key):
 
 def open_pulls(key):
     repo, _, _ = PROJECTS[key]
-    return gh_json(f"repos/{ORG}/{repo}/pulls?state=open&per_page=100")
+    return gh_json_pages(f"repos/{ORG}/{repo}/pulls?state=open")
 
 
 def manual_version_pr(key, pulls):
@@ -188,6 +200,27 @@ def replace_parent(content, desired):
     return pattern.sub(lambda match: match.group(1) + desired + match.group(3), content), True
 
 
+def dependency_versions_match(content, properties, versions):
+    platform = versions.get("platform")
+    if platform:
+        match = re.search(
+            r"<parent>\s*<groupId>nl\.hauntedmc\.platform</groupId>\s*"
+            r"<artifactId>haunted-(?:library|application)-parent</artifactId>\s*"
+            r"<version>([^<]+)</version>", content
+        )
+        if not match or match.group(1) != platform:
+            return False
+    for property_name, producer in properties.items():
+        desired = versions.get(producer)
+        if not desired:
+            continue
+        match = re.search(rf"<{re.escape(property_name)}>([^<]+)</{re.escape(property_name)}>",
+                          content)
+        if not match or match.group(1) != desired:
+            return False
+    return True
+
+
 def reconcile(key, properties, module, versions):
     repo, pom_path, _ = PROJECTS[key]
     if manual_version_pr(key, open_pulls(key)):
@@ -218,13 +251,6 @@ def reconcile(key, properties, module, versions):
             desired, changed = replace_property(desired, property_name, latest)
             if changed:
                 changes.append(f"{property_name} → {latest}")
-    remove_legacy_helper = (
-        key == "dataprovider" and platform is not None
-        and semver(platform) >= (2, 0, 0)
-        and "<build.helper.maven.plugin.version>" in base_pom
-    )
-    if remove_legacy_helper:
-        changes.append("build-helper plugin version → inherited from Platform")
     if not changes:
         print(f"{repo}/{key}: already aligned", flush=True)
         return
@@ -233,7 +259,22 @@ def reconcile(key, properties, module, versions):
         run("git", "clone", "--quiet", f"https://github.com/{ORG}/{repo}.git", str(work))
         run("git", "config", "user.name", "hauntedmc-release-bot", cwd=work)
         run("git", "config", "user.email", "release-bot@users.noreply.github.com", cwd=work)
-        prepare = "./tools/release/prepare-version.sh" if (work / "tools/release/prepare-version.sh").is_file() else "./update_version.sh"
+        branch = branch_for(key)
+        existing = next((pr for pr in open_pulls(key)
+                         if pr["head"]["ref"] == branch), None)
+        if existing:
+            run("git", "fetch", "--quiet", "origin", branch, cwd=work)
+            main_sha = run("git", "rev-parse", "HEAD", cwd=work).strip()
+            ancestor = run("git", "merge-base", "HEAD", "FETCH_HEAD", cwd=work).strip()
+            remote_pom = run("git", "show", f"FETCH_HEAD:{pom_path}", cwd=work)
+            major, minor, patch = semver(current_revision(base_pom))
+            next_version = f"{major}.{minor}.{patch + 1}"
+            aligned = (dependency_versions_match(remote_pom, properties, versions)
+                       and current_revision(remote_pom) == next_version)
+            if ancestor == main_sha and aligned:
+                print(f"{repo}/{key}: existing PR is current", flush=True)
+                return
+        prepare = "./tools/release/prepare-version.sh"
         if module:
             run(prepare, module, "patch", cwd=work)
         else:
@@ -247,19 +288,10 @@ def reconcile(key, properties, module, versions):
             latest = versions.get(producer)
             if latest:
                 updated, _ = replace_property(updated, property_name, latest)
-        if remove_legacy_helper:
-            updated, removed = re.subn(
-                r"^\s*<build\.helper\.maven\.plugin\.version>[^<]+"
-                r"</build\.helper\.maven\.plugin\.version>\n",
-                "", updated, count=1, flags=re.MULTILINE,
-            )
-            if removed != 1:
-                raise ValueError("Expected one legacy build-helper override")
         pom.write_text(updated)
         run("git", "diff", "--check", cwd=work)
         run("git", "add", "-A", cwd=work)
         run("git", "commit", "-m", "chore: align published HauntedMC dependencies", cwd=work)
-        branch = branch_for(key)
         verification = (
             "GitHub Actions are paused for this repository. This PR is a draft until "
             "`gh haunted-release verify-pr NUMBER` passes locally at the current head. "
@@ -274,39 +306,14 @@ def reconcile(key, properties, module, versions):
             + "\n".join(f"- {change}" for change in changes)
             + "\n\nThis PR also prepares a patch version. " + verification
         )
-        if (work / "tools/release/project.toml").is_file():
-            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".md") as body_file:
-                body_file.write(body)
-                body_file.flush()
-                run(
-                    "gh", "haunted-release", "publish-pr", "--branch", branch,
-                    "--title", "chore: align published HauntedMC dependencies",
-                    "--body-file", body_file.name, cwd=work,
-                )
-            print(f"{repo}/{key}: opened or refreshed PR for {', '.join(changes)}", flush=True)
-            return
-        remote = subprocess.run(
-            ["git", "fetch", "--quiet", "origin", f"refs/heads/{branch}:refs/remotes/origin/{branch}"],
-            cwd=work, capture_output=True, text=True,
-        )
-        if remote.returncode == 0:
-            same = subprocess.run(
-                ["git", "diff", "--quiet", "HEAD", f"origin/{branch}"],
-                cwd=work,
-            ).returncode == 0
-            if same:
-                print(f"{repo}/{key}: existing PR is current", flush=True)
-                return
-        run("git", "push", "--quiet", "--force-with-lease", "origin", f"HEAD:refs/heads/{branch}", cwd=work)
-        pulls = gh_json(f"repos/{ORG}/{repo}/pulls?state=open&head={ORG}:{branch}&per_page=100")
-        if pulls:
-            run("gh", "api", "-X", "PATCH",
-                f"repos/{ORG}/{repo}/pulls/{pulls[0]['number']}",
-                "-f", f"body={body}", cwd=work)
-        else:
-            run("gh", "pr", "create", "--repo", f"{ORG}/{repo}", "--base", "main",
-                "--head", branch, "--title", "chore: align published HauntedMC dependencies",
-                "--body", body, cwd=work)
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".md") as body_file:
+            body_file.write(body)
+            body_file.flush()
+            run(
+                "gh", "haunted-release", "publish-pr", "--branch", branch,
+                "--title", "chore: align published HauntedMC dependencies",
+                "--body-file", body_file.name, cwd=work,
+            )
         print(f"{repo}/{key}: opened or refreshed PR for {', '.join(changes)}", flush=True)
 
 

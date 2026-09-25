@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a problem with the HauntedPlatform build policy
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Provide enough detail to reproduce the problem without exposing credentials or private repository data.
+  - type: checkboxes
+    id: precheck
+    attributes:
+      label: Pre-check
+      options:
+        - label: I searched existing issues and tested the latest release.
+          required: true
+        - label: I removed tokens, secrets, and private data from logs and snippets.
+          required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include the Maven command, affected POM or consuming project, and relevant versions.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: platform_version
+    attributes:
+      label: Release HauntedPlatform version
+      description: Output of `the published Platform release tag`.
+      placeholder: 2.0.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Python version, and GitHub HauntedPlatform version.
+      placeholder: Java 25; Maven 3.9; Ubuntu 24.04
+    validations:
+      required: true
+  - type: dropdown
+    id: command
+    attributes:
+      label: Affected area
+      options:
+        - Dependency or BOM resolution
+        - Parent or plugin policy
+        - Release publication
+        - Consumer contract
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output (optional)
+      description: Remove credentials and private data before pasting.
+      render: shell

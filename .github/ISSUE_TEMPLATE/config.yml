@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support
+    url: https://www.hauntedmc.nl/support
+    about: Use support for help using the HauntedPlatform.
+  - name: Security report
+    url: https://github.com/HauntedMC/HauntedPlatform/security/advisories/new
+    about: Report vulnerabilities privately.
