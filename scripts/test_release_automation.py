@@ -38,7 +38,8 @@ class ReleaseAutomationTest(unittest.TestCase):
                                 ("craftgpt", "CraftGPT"),
                                 ("velocityhotreloader", "VelocityHotReloader"),
                                 ("paperhotreloader", "PaperHotReloader"),
-                                ("webapp", "WebApp")):
+                                ("webapp", "WebApp"),
+                                ("controlplane", "HauntedControlPlane")):
             self.assertEqual(updater.PROJECTS[key], (repository, "pom.xml", "v"))
             self.assertEqual(targets[key], ((), {}, None))
 
@@ -75,6 +76,7 @@ class ReleaseAutomationTest(unittest.TestCase):
             self.assertFalse(updater.pending("proxyfeatures", {"proxyfeatures": "5.3.1"}))
             self.assertFalse(updater.pending("serverfeatures", {"serverfeatures": "5.2.6"}))
             self.assertFalse(updater.pending("webapp", {"webapp": "0.0.1"}))
+            self.assertFalse(updater.pending("controlplane", {"controlplane": "0.1.0"}))
 
     def test_manual_release_pr_blocks_bot_update(self):
         pulls = [{"head": {"ref": "release/v5.7.2"}}]
