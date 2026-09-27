@@ -2,8 +2,8 @@
 """Reconcile reviewed internal-dependency PRs after a verified package release.
 
 Runs in the HauntedPlatform repository with a GitHub App installation token.
-It never merges or publishes a consumer. ProxyFeatures, ServerFeatures, and
-WebApp verify locally while their GitHub Actions are disabled.
+It never merges or publishes a consumer. ProxyFeatures, ServerFeatures, WebApp, and
+HauntedControlPlane verify locally while their GitHub Actions are disabled.
 """
 import base64
 import json
@@ -16,7 +16,7 @@ from pathlib import Path
 
 ORG = "HauntedMC"
 BRANCH = "automation/internal-dependencies"
-LOCAL_VERIFICATION_TARGETS = {"proxyfeatures", "serverfeatures", "webapp"}
+LOCAL_VERIFICATION_TARGETS = {"proxyfeatures", "serverfeatures", "webapp", "controlplane"}
 PROJECTS = {
     "platform": ("HauntedPlatform", "pom.xml", "v"),
     "palette": ("Theme", "hauntedmc-theme-palette/pom.xml", "palette-v"),
@@ -33,6 +33,7 @@ PROJECTS = {
     "velocityhotreloader": ("VelocityHotReloader", "pom.xml", "v"),
     "paperhotreloader": ("PaperHotReloader", "pom.xml", "v"),
     "webapp": ("WebApp", "pom.xml", "v"),
+    "controlplane": ("HauntedControlPlane", "pom.xml", "v"),
 }
 TARGETS = [
     ("palette", (), {}, "palette"),
@@ -77,6 +78,7 @@ TARGETS = [
     ("velocityhotreloader", (), {}, None),
     ("paperhotreloader", (), {}, None),
     ("webapp", (), {}, None),
+    ("controlplane", (), {}, None),
 ]
 
 
