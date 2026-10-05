@@ -66,7 +66,7 @@
         <haunted.griefprevention.version>18.0.0</haunted.griefprevention.version>
         <haunted.essentialsx.version>2.21.2</haunted.essentialsx.version>
         <haunted.item.nbt.api.version>2.16.1</haunted.item.nbt.api.version>
-        <haunted.checker.qual.version>4.2.3</haunted.checker.qual.version>
+        <haunted.checker.qual.version>4.3.0</haunted.checker.qual.version>
         <haunted.joml.version>1.10.9</haunted.joml.version>
         <haunted.guava.version>33.7.1-jre</haunted.guava.version>
         <haunted.guice.version>7.0.0</haunted.guice.version>
