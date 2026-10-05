@@ -74,7 +74,7 @@
         <haunted.mysql.connector.version>26.7.0</haunted.mysql.connector.version>
         <haunted.mockbukkit.version>4.116.1</haunted.mockbukkit.version>
         <haunted.hikari.version>7.1.0</haunted.hikari.version>
-        <haunted.mongodb.driver.version>5.12.0</haunted.mongodb.driver.version>
+        <haunted.mongodb.driver.version>5.13.0</haunted.mongodb.driver.version>
         <haunted.jedis.version>8.0.1</haunted.jedis.version>
     </properties>
     <distributionManagement><repository><id>github</id><name>GitHub Packages - HauntedPlatform</name><url>https://maven.pkg.github.com/HauntedMC/HauntedPlatform</url></repository></distributionManagement>
