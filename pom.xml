@@ -68,7 +68,7 @@
         <haunted.item.nbt.api.version>2.16.1</haunted.item.nbt.api.version>
         <haunted.checker.qual.version>4.2.3</haunted.checker.qual.version>
         <haunted.joml.version>1.10.9</haunted.joml.version>
-        <haunted.guava.version>33.7.1-jre</haunted.guava.version>
+        <haunted.guava.version>33.7.2-jre</haunted.guava.version>
         <haunted.guice.version>7.0.0</haunted.guice.version>
         <haunted.caffeine.version>3.3.0</haunted.caffeine.version>
         <haunted.mysql.connector.version>26.7.0</haunted.mysql.connector.version>
