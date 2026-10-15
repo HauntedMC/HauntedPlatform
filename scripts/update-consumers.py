@@ -6,12 +6,15 @@ It never merges or publishes a consumer. ProxyFeatures, ServerFeatures, WebApp, 
 HauntedControlPlane verify locally while their GitHub Actions are disabled.
 """
 import base64
+import errno
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 import time
+from contextlib import contextmanager
 from pathlib import Path
 
 ORG = "HauntedMC"
@@ -87,6 +90,24 @@ def run(*args, cwd=None, input=None):
     if result.returncode:
         raise RuntimeError(f"{' '.join(args[:3])} failed: {result.stderr.strip()}")
     return result.stdout
+
+@contextmanager
+def temporary_checkout(key):
+    """Remove disposable checkouts even if Git briefly recreates .git files."""
+    directory = Path(tempfile.mkdtemp(prefix=f"haunted-update-{key}-"))
+    try:
+        yield directory
+    finally:
+        # A detached Git helper can race with rmtree on Linux (ENOTEMPTY).
+        # Retry only transient races, and still surface persistent failures.
+        for attempt in range(5):
+            try:
+                shutil.rmtree(directory)
+                break
+            except OSError as exc:
+                if exc.errno not in (errno.ENOTEMPTY, errno.EBUSY) or attempt == 4:
+                    raise
+                time.sleep(0.1 * (attempt + 1))
 
 
 def gh_json(path):
@@ -281,9 +302,16 @@ def reconcile(key, properties, module, versions):
     if not changes:
         print(f"{repo}/{key}: already aligned", flush=True)
         return
-    with tempfile.TemporaryDirectory(prefix=f"haunted-update-{key}-") as directory:
-        work = Path(directory) / repo
-        run("git", "clone", "--quiet", f"https://github.com/{ORG}/{repo}.git", str(work))
+    with temporary_checkout(key) as directory:
+        work = directory / repo
+        # Clone-time config prevents Git from spawning detached maintenance;
+        # --config persists it for later fetch/commit and gh publish-pr calls.
+        run(
+            "git", "clone", "--quiet",
+            "--config", "gc.auto=0",
+            "--config", "maintenance.auto=false",
+            f"https://github.com/{ORG}/{repo}.git", str(work),
+        )
         run("git", "config", "user.name", "hauntedmc-release-bot", cwd=work)
         run("git", "config", "user.email", "release-bot@users.noreply.github.com", cwd=work)
         branch = branch_for(key)
@@ -320,8 +348,12 @@ def reconcile(key, properties, module, versions):
         run("git", "add", "-A", cwd=work)
         run("git", "commit", "-m", "chore: align published HauntedMC dependencies", cwd=work)
         verification = (
-            "GitHub Actions are paused for this repository. This PR is a draft until "
-            "`gh haunted-release verify-pr NUMBER` passes locally at the current head. "
+            "GitHub Actions are paused for this repository. Local verification with "
+            "`gh haunted-release verify-pr NUMBER` is optional and does not block review or merge. "
+            "Merging will not publish or notify downstream repositories while Actions are disabled.\n"
+            if key in {"proxyfeatures", "serverfeatures", "webapp"} else
+            "GitHub Actions are paused for this repository. Run "
+            "`gh haunted-release verify-pr NUMBER` locally before merging the draft PR. "
             "Merging will not publish or notify downstream repositories while Actions are disabled.\n"
             if key in LOCAL_VERIFICATION_TARGETS else
             "Merge after this repository's CI passes; its release workflow will publish "
