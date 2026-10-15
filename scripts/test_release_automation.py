@@ -1,3 +1,4 @@
+import errno
 import importlib.util
 import unittest
 from pathlib import Path
@@ -149,9 +150,46 @@ class ReleaseAutomationTest(unittest.TestCase):
                               {"haunted.theme.version": "palette"}, None,
                               {"platform": "2.0.0", "palette": "1.2.2",
                                "dataprovider": "3.4.5"})
+        clone = next(args for args in calls if args[:3] == ("git", "clone", "--quiet"))
+        self.assertIn("gc.auto=0", clone)
+        self.assertIn("maintenance.auto=false", clone)
         self.assertNotIn(("gh", "haunted-release", "publish-pr"), calls)
         self.assertFalse(any(args and args[0] == "./tools/release/prepare-version.sh"
                              for args in calls))
+
+    def test_temporary_checkout_retries_transient_git_cleanup_races(self):
+        real_rmtree = updater.shutil.rmtree
+        attempts = []
+
+        def flaky_rmtree(path):
+            attempts.append(path)
+            if len(attempts) == 1:
+                raise OSError(errno.ENOTEMPTY, "Directory not empty", ".git")
+            return real_rmtree(path)
+
+        with patch.object(updater.shutil, "rmtree", side_effect=flaky_rmtree), \
+             patch.object(updater.time, "sleep") as sleep:
+            with updater.temporary_checkout("proxyfeatures") as checkout:
+                (checkout / "ProxyFeatures" / ".git").mkdir(parents=True)
+            self.assertFalse(checkout.exists())
+        self.assertEqual(len(attempts), 2)
+        sleep.assert_called_once_with(0.1)
+
+    def test_temporary_checkout_still_raises_nontransient_cleanup_errors(self):
+        real_rmtree = updater.shutil.rmtree
+        checkout = None
+        try:
+            with patch.object(
+                updater.shutil, "rmtree",
+                side_effect=PermissionError(errno.EACCES, "Permission denied")
+            ), patch.object(updater.time, "sleep") as sleep:
+                with self.assertRaises(PermissionError):
+                    with updater.temporary_checkout("proxyfeatures") as checkout:
+                        pass
+                sleep.assert_not_called()
+        finally:
+            if checkout is not None and checkout.exists():
+                real_rmtree(checkout)
 
     def test_paginated_github_lists(self):
         with patch.object(updater, "gh_json", side_effect=[[None] * 100, ["last"]]) as api:
