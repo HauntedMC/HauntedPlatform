@@ -348,8 +348,12 @@ def reconcile(key, properties, module, versions):
         run("git", "add", "-A", cwd=work)
         run("git", "commit", "-m", "chore: align published HauntedMC dependencies", cwd=work)
         verification = (
-            "GitHub Actions are paused for this repository. This PR is a draft until "
-            "`gh haunted-release verify-pr NUMBER` passes locally at the current head. "
+            "GitHub Actions are paused for this repository. Local verification with "
+            "`gh haunted-release verify-pr NUMBER` is optional and does not block review or merge. "
+            "Merging will not publish or notify downstream repositories while Actions are disabled.\n"
+            if key in {"proxyfeatures", "serverfeatures", "webapp"} else
+            "GitHub Actions are paused for this repository. Run "
+            "`gh haunted-release verify-pr NUMBER` locally before merging the draft PR. "
             "Merging will not publish or notify downstream repositories while Actions are disabled.\n"
             if key in LOCAL_VERIFICATION_TARGETS else
             "Merge after this repository's CI passes; its release workflow will publish "
