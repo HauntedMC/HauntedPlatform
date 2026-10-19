@@ -72,7 +72,7 @@
         <haunted.guice.version>7.0.0</haunted.guice.version>
         <haunted.caffeine.version>3.3.0</haunted.caffeine.version>
         <haunted.mysql.connector.version>26.7.0</haunted.mysql.connector.version>
-        <haunted.mockbukkit.version>4.116.1</haunted.mockbukkit.version>
+        <haunted.mockbukkit.version>4.117.0</haunted.mockbukkit.version>
         <haunted.hikari.version>7.1.0</haunted.hikari.version>
         <haunted.mongodb.driver.version>5.13.0</haunted.mongodb.driver.version>
         <haunted.jedis.version>8.0.2</haunted.jedis.version>
