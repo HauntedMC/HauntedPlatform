@@ -22,7 +22,7 @@
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven.install.plugin.version>3.1.4</maven.install.plugin.version>
         <maven.deploy.plugin.version>3.2.0</maven.deploy.plugin.version>
-        <haunted.opentelemetry.version>1.66.0</haunted.opentelemetry.version>
+        <haunted.opentelemetry.version>1.67.0</haunted.opentelemetry.version>
         <haunted.opentelemetry.runtime-telemetry.version>2.31.1-alpha</haunted.opentelemetry.runtime-telemetry.version>
         <haunted.adventure.version>5.2.0</haunted.adventure.version>
         <haunted.gson.version>2.14.0</haunted.gson.version>
