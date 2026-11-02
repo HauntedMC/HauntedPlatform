@@ -30,7 +30,7 @@
         <haunted.slf4j.version>2.0.20</haunted.slf4j.version>
         <haunted.junit.version>6.1.3</haunted.junit.version>
         <haunted.mockito.version>5.24.0</haunted.mockito.version>
-        <haunted.errorprone.version>2.50.0</haunted.errorprone.version>
+        <haunted.errorprone.version>2.51.0</haunted.errorprone.version>
         <haunted.jetbrains.annotations.version>26.1.0</haunted.jetbrains.annotations.version>
         <haunted.jspecify.version>1.0.1</haunted.jspecify.version>
         <haunted.jpa.version>3.2.0</haunted.jpa.version>
