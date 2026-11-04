@@ -51,6 +51,7 @@ files=(
     haunted-application-parent/pom.xml
     verification/pom.xml
     verification/bom-consumer/pom.xml
+    verification/minecraft-bom-consumer/pom.xml
     verification/library-parent-consumer/pom.xml
     verification/application-parent-consumer/pom.xml
 )

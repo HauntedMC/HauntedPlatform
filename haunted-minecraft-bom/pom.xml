@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
-  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>2.0.0</version></parent>
+  <parent><groupId>nl.hauntedmc.platform</groupId><artifactId>haunted-platform</artifactId><version>2.1.0</version></parent>
   <artifactId>haunted-minecraft-bom</artifactId><packaging>pom</packaging><name>HauntedPlatform Minecraft integrations BOM</name><description>Shared Paper, Velocity, and Minecraft plugin API versions.</description>
   <dependencyManagement><dependencies>
     <!-- Shared server and proxy APIs. Keep their versions in the platform parent. -->
@@ -25,6 +25,6 @@
     <dependency><groupId>com.github.TechFortress</groupId><artifactId>GriefPrevention</artifactId><version>${haunted.griefprevention.version}</version></dependency>
     <dependency><groupId>net.essentialsx</groupId><artifactId>EssentialsX</artifactId><version>${haunted.essentialsx.version}</version></dependency>
     <dependency><groupId>de.tr7zw</groupId><artifactId>item-nbt-api</artifactId><version>${haunted.item.nbt.api.version}</version></dependency>
-    <dependency><groupId>org.mockbukkit.mockbukkit</groupId><artifactId>mockbukkit-v26.2</artifactId><version>${haunted.mockbukkit.version}</version></dependency>
+    <dependency><groupId>org.mockbukkit.mockbukkit</groupId><artifactId>mockbukkit-v26.3</artifactId><version>${haunted.mockbukkit.version}</version></dependency>
   </dependencies></dependencyManagement>
 </project>

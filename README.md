@@ -13,11 +13,38 @@ HauntedPlatform is HauntedMC's shared **external dependency and build policy**. 
 
 Internal versions belong to the consuming repository. DataProvider, DataRegistry, FeatureFramework, and HauntedObservability publish BOMs for **their own** modules. Theme publishes palette and FeatureFramework adapter separately. ProxyFeatures and ServerFeatures import those BOMs and select each released internal version in their root POMs. Dungeons, VelocityHotReloader, PaperHotReloader, AIlex, CraftGPT, WebApp, and HauntedControlPlane inherit the application parent for build policy without adding runtime HauntedMC library dependencies. This removes the former `haunted-platform-bom` release cycle; version 1.6.10 remains available for older consumers, but 2.0.0 and later do not publish that artifact.
 
+Platform 2.1.0 targets Paper `26.3.build.241-stable` (runtime build 241), Velocity `4.3.1` (runtime build 45), and MockBukkit `mockbukkit-v26.3:4.119.0`. Java 25 remains the shared build target.
+
+The Minecraft integration pins were audited for this release:
+
+| Integration | Managed version |
+| --- | --- |
+| PacketEvents | 2.14.0 |
+| Citizens | 2.0.44-SNAPSHOT (upstream publishes snapshots) |
+| ViaVersion | 5.12.2 |
+| LibsDisguises | 26.10.24 |
+| WorldGuard / WorldEdit | 7.0.21 / 7.4.6 |
+| FastAsyncWorldEdit | 2.16.2 |
+| Item-NBT-API | 2.16.1 (already includes 26.3 support) |
+| PlaceholderAPI / LuckPerms API / Vault API | 2.12.3 / 5.5 / 1.7.1 (current published APIs) |
+| GriefPrevention | 18.0.0 (current published Maven coordinate) |
+| EssentialsX | 2.21.2 (2.22.0 release exists, but its Maven artifact is not published) |
+
+Consumers that import internal BOMs in their own dependency management must import
+`haunted-dependencies-bom` (and `haunted-minecraft-bom` for applications) first, using
+`${haunted.platform.version}`. Otherwise Maven can prefer an older external version
+inherited by an internal BOM over the selected parent.
+
+CI and release verification resolve every managed Minecraft integration JAR through
+`verification/minecraft-bom-consumer`. This checks coordinate availability; each plugin's
+own tests and runtime acceptance checks establish compatibility. Publish Platform before
+merging downstream parent updates so their builds can resolve 2.1.0.
+
 ## Maven consumption
 
 GitHub Packages requires authenticated Maven access. All HauntedMC builds use Maven server id `github` and set `PACKAGES_USER` and `PACKAGES_TOKEN` in CI or the local environment. Their committed `.mvn/settings.xml` and `.mvn/maven.config` make the package repository available before Maven resolves a parent POM. Never commit package credentials.
 
-Reusable libraries inherit `nl.hauntedmc.platform:haunted-library-parent:2.0.0`. Applications inherit `nl.hauntedmc.platform:haunted-application-parent:2.0.0`. Projects that cannot inherit a parent can import `haunted-dependencies-bom` directly; applications can also import `haunted-minecraft-bom`. Keep external dependency and Maven plugin versions in Platform, and keep application-specific shading, acceptance fixtures, and compatibility choices in their owning repositories.
+Reusable libraries inherit `nl.hauntedmc.platform:haunted-library-parent:2.1.0`. Applications inherit `nl.hauntedmc.platform:haunted-application-parent:2.1.0`. Projects that cannot inherit a parent can import `haunted-dependencies-bom` directly; applications can also import `haunted-minecraft-bom`. Keep external dependency and Maven plugin versions in Platform, and keep application-specific shading, acceptance fixtures, and compatibility choices in their owning repositories.
 
 A consuming project's root POM chooses its internal versions explicitly:
 

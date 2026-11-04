@@ -77,7 +77,7 @@ jobs:
           VERIFICATION_REPOSITORY: ${{ runner.temp }}/haunted-platform-release-m2
         run: |
           mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" clean install
-          for fixture in bom-consumer library-parent-consumer application-parent-consumer; do
+          for fixture in bom-consumer minecraft-bom-consumer library-parent-consumer application-parent-consumer; do
             mvn -U -B -ntp -Dmaven.repo.local="$VERIFICATION_REPOSITORY" -f "verification/$fixture/pom.xml" clean verify
           done
       - id: preflight
